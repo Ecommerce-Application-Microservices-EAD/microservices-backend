@@ -88,4 +88,3 @@ Thumbs.db
 
 # Ignore test reports
 **/surefire-reports/
-/.metadata/

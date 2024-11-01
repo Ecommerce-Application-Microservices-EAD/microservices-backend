@@ -108,3 +108,13 @@ services:
     container_name: onlineshop-service-discovery
     ports:
       - "8761:8761"
+  
+  payment-service:
+    build:
+      context: ./payment-service
+      dockerfile: Dockerfile
+    container_name: onlineshop-payment-service
+    ports:
+      - "8085:8085"
+    depends_on:
+      - mongodb

@@ -14,6 +14,8 @@ import org.springframework.security.oauth2.server.resource.authentication.Reacti
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpMethod;
+
 
 @Configuration
 @EnableWebFluxSecurity
@@ -44,7 +46,10 @@ public class SecurityConfig {
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers(AUTH_WHITELIST).permitAll()
                         .pathMatchers("/api/auth/**", "/api/user/**").permitAll()
-                        .pathMatchers("/api/product/**").hasAnyRole("USER", "ADMIN")
+                        .pathMatchers(HttpMethod.GET, "/api/product", "/api/product/{productId}", "/api/product/categories", "/api/product/search").hasAnyRole("USER", "ADMIN")
+                        .pathMatchers(HttpMethod.POST, "/api/product").hasRole("ADMIN")
+                        .pathMatchers(HttpMethod.PUT, "/api/product/{productId}").hasRole("ADMIN")
+                        .pathMatchers(HttpMethod.DELETE, "/api/product/{productId}").hasRole("ADMIN")
                         .pathMatchers("/api/inventory/**").hasAnyRole("ADMIN")
                         .pathMatchers("/api/order/**").hasAnyRole("USER")
                         .anyExchange().authenticated()

@@ -31,4 +31,26 @@ public class ProductController {
         return productService.getAllProducts();
     }
 
+    @GetMapping("/{productId}")
+    public ProductResponse getProductById(@PathVariable String productId) {
+        log.info("Fetching product with ID: {}", productId);
+        return productService.getProductById(productId);
+    }
+    @PutMapping("/{productId}")
+    @ResponseStatus(HttpStatus.OK)
+    public ProductResponse updateProductById(@PathVariable String productId, @RequestBody ProductRequest productRequest) {
+        log.info("Updating product with ID: {}", productId);
+        return productService.updateProduct(productId, productRequest);
+    }
+
+    @DeleteMapping("/{productId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteProductById(@PathVariable String productId) {
+        log.info("Deleting product with ID: {}", productId);
+        productService.deleteProduct(productId);
+    }
+
+
+
+
 }

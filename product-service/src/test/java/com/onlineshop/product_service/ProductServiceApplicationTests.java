@@ -34,6 +34,7 @@ class ProductServiceApplicationTests {
 				    "name":"iphone 16",
 				    "description":"new iphone",
 				    "price":999
+				    
 				}
 				""";
 		RestAssured.given().contentType("application/json")

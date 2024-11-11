@@ -21,6 +21,8 @@ import static io.restassured.RestAssured.given;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 
+import com.onlineshop.product_service.exception.ProductNotFoundException;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class ProductServiceUnitTests {
 
@@ -58,7 +60,18 @@ public class ProductServiceUnitTests {
 
     @Test
     void shouldCreateProductFailure() {
+        ProductRequest productRequest = new ProductRequest("iphone 16", "new iphone", new BigDecimal("999"));
 
+        Mockito.when(productService.createProduct(any(ProductRequest.class)))
+                .thenThrow(new RuntimeException("Product creation failed"));
+
+        given()
+                .contentType("application/json")
+                .body(productRequest)
+                .when()
+                .post("/api/product")
+                .then()
+                .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
     }
 
 
@@ -120,6 +133,16 @@ public class ProductServiceUnitTests {
     @Test
     void shouldGetProductByIdFailure() {
 
+        Mockito.when(productService.getProductById("1"))
+                .thenThrow(new ProductNotFoundException("Product not found"));
+
+        given()
+                .contentType("application/json")
+                .when()
+                .get("/api/product/1")
+                .then()
+                .statusCode(HttpStatus.NOT_FOUND.value())
+                .body("message", Matchers.equalTo("Product not found"));
     }
 
 

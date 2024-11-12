@@ -1,15 +1,17 @@
-package com.onlineshop.product_service.service;
+package com.onlineshop.product_service;
 
 import com.onlineshop.product_service.dto.ProductRequest;
 import com.onlineshop.product_service.dto.ProductResponse;
 import com.onlineshop.product_service.exception.ProductNotFoundException;
 import com.onlineshop.product_service.model.Product;
 import com.onlineshop.product_service.repository.ProductRepository;
+import com.onlineshop.product_service.service.ProductService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -120,7 +122,7 @@ class ProductServiceTests {
 
 
         verify(productRepository, times(1)).delete(product);
-    }
+}
     @Test
     void shouldThrowExceptionWhenDeletingNonexistentProduct() {
         when(productRepository.findById("1")).thenReturn(Optional.empty());

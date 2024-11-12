@@ -24,7 +24,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import com.onlineshop.product_service.exception.ProductNotFoundException;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class ProductServiceUnitTests {
+public class ProductControllerTests {
 
     @LocalServerPort
     private int port;

@@ -1,63 +1,99 @@
+// src/main/java/com//paymentservice/controller/PaymentController.java
+
 package com.onlineshop.payment_service.controller;
 
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.onlineshop.payment_service.dto.PaymentRequestDTO;
-import com.onlineshop.payment_service.dto.PaymentResponseDTO;
+import com.onlineshop.payment_service.model.Payment;
 import com.onlineshop.payment_service.service.PaymentService;
+
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/payments")
+@CrossOrigin(origins = "http://localhost:3000")
 public class PaymentController {
-
-//    private static final Logger log = LoggerFactory.getLogger(PaymentController.class);
 
     @Autowired
     private PaymentService paymentService;
 
-    @GetMapping()
-    public String Hello() {
-        System.out.println("Get - /api/payments - controller called");
-//        log.info("Get - /api/payments - controller called");
-        return "Hello World";
+    /*
+     * @PostMapping("/create")
+     * public ResponseEntity<String> createPayment(@RequestBody Map<String, Object>
+     * paymentData) {
+     * try {
+     * Long amount = Long.valueOf(paymentData.get("amount").toString());
+     * String currency = paymentData.get("currency").toString();
+     * String clientSecret = paymentService.createPayment(amount, currency);
+     * return ResponseEntity.ok(clientSecret);
+     * } catch (Exception e) {
+     * return ResponseEntity.status(500).body(e.getMessage());
+     * }
+     * }
+     */
+
+    @PostMapping("/create")
+    public ResponseEntity<Map<String, String>> createPayment(@RequestBody Map<String, Object> paymentData) {
+        try {
+            System.out.println('1');
+            Long amount = Long.valueOf(paymentData.get("amount").toString());
+            String currency = paymentData.get("currency").toString();
+            System.out.println("amount: " + amount);
+            System.out.println("currency: " + currency);
+            String res = paymentService.createPayment(amount, currency);
+          //  System.out.println("res: " + res);
+            String[] parts = res.split(", ");
+            String clientSecret = parts[1];
+            String paymentId = parts[0];
+            System.out.println("clientSecret: " + clientSecret);
+            System.out.println("paymentId: " + paymentId);
+            return ResponseEntity.ok(Map.of("clientSecret", clientSecret, "paymentId", paymentId));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+        }
     }
 
     @GetMapping("/{id}")
-    public PaymentResponseDTO getPaymentById(@PathVariable Long id) {
-        return paymentService.getPaymentById(id);
+    public ResponseEntity<Payment> getPayment(@PathVariable String id) {
+        Payment payment = paymentService.getPayment(id);
+        if (payment != null) {
+            return ResponseEntity.ok(payment);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
-    @GetMapping("/all")
-    public List<PaymentResponseDTO> getAllPayments() {
-        System.out.println("Get - /api/payments/all - controller called");
-        return paymentService.getAllPayments();
+    @PutMapping("/{id}/status")
+    public ResponseEntity<Payment> updatePaymentStatus(@PathVariable String id,
+            @RequestBody Map<String, String> statusData) {
+        String status = statusData.get("status");
+        Payment updatedPayment = paymentService.updatePaymentStatus(id, status);
+        if (updatedPayment != null) {
+            return ResponseEntity.ok(updatedPayment);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
-    @PostMapping("/initiate")
-    public PaymentResponseDTO initiatePayment(@RequestBody PaymentRequestDTO paymentRequestDto) {
-        System.out.println("Post - /api/payments/initiate - controller called");
-        return paymentService.initiatePayment(paymentRequestDto);
+    @PostMapping("/{id}/confirm")
+    public ResponseEntity<String> confirmPayment(@PathVariable String id) {
+        try {
+            paymentService.confirmPayment(id);
+            return ResponseEntity.ok("Payment confirmed");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(e.getMessage());
+        }
     }
 
-    @PostMapping("/confirm/{id}")
-    public PaymentResponseDTO confirmPayment(@PathVariable Long id) {
-        System.out.println("Post - /api/payments/confirm/{id} - controller called");
-        return paymentService.confirmPayment(id);
-    }
-
-    @PostMapping("/cancel/{id}")
-    public PaymentResponseDTO cancelPayment(@PathVariable Long id) {
-        System.out.println("Post - /api/payments/cancel/{id} - controller called");
-        return paymentService.cancelPayment(id);
+    @PostMapping("/{id}/cancel")
+    public ResponseEntity<String> cancelPayment(@PathVariable String id) {
+        try {
+            paymentService.cancelPayment(id);
+            return ResponseEntity.ok("Payment cancelled");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(e.getMessage());
+        }
     }
 }

@@ -22,10 +22,6 @@ public class GlobalExceptionHandler {
         return createErrorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(TransactionFailureException.class)
-    public ResponseEntity<Map<String, Object>> handleTransactionFailureException(TransactionFailureException ex) {
-        return createErrorResponse(ex.getMessage(), HttpStatus.CONFLICT);
-    }
 
     // Generic Exception Handler for any other exceptions
     @ExceptionHandler(Exception.class)

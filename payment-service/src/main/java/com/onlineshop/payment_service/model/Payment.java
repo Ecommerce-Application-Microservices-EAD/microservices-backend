@@ -1,41 +1,32 @@
-// File: payment/model/Payment.java
+// src/main/java/com/example/paymentservice/model/Payment.java
 
 package com.onlineshop.payment_service.model;
 
-import java.time.LocalDateTime;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
+@Data
+@Document(collection = "payments")
 public class Payment {
-
+    
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
+    private String currency;
+    private Long amount;
+    private String status;
+    private String stripePaymentId;
 
-    private Double amount;
-    private String status; // e.g., "INITIATED", "CONFIRMED", "CANCELED"
-    private LocalDateTime timestamp;
-
-  
-     // Constructor
-    public Payment(Double amount, String status, LocalDateTime timestamp) {
+    // constructors
+    public Payment(String currency, Long amount, String status, String stripePaymentId) {
+        this.currency = currency;
         this.amount = amount;
         this.status = status;
-        this.timestamp = timestamp;
-    } 
-
-    // Getters and Setters
+        this.stripePaymentId = stripePaymentId;
+    }
 }

@@ -64,6 +64,13 @@
 			<scope>test</scope>
 		</dependency>
 
+		<dependency>
+    <groupId>com.stripe</groupId>
+    <artifactId>stripe-java</artifactId>
+    <version>22.4.0</version> <!-- Check for the latest version -->
+</dependency>
+
+
 		<!-- Add MongoDB Dependency -->
 <dependency>
     <groupId>org.springframework.boot</groupId>

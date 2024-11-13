@@ -6,7 +6,10 @@ import com.onlineshop.product_service.model.Product;
 import com.onlineshop.product_service.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import lombok.Data;
 import org.springframework.stereotype.Service;
+import com.onlineshop.product_service.exception.ProductNotFoundException;
+
 
 import java.util.List;
 
@@ -44,4 +47,47 @@ public class ProductService {
                         .build())
                 .toList();
     }
+
+    public ProductResponse getProductById(String id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ProductNotFoundException(id));
+
+        return ProductResponse.builder()
+                .id(product.getId())
+                .name(product.getName())
+                .description(product.getDescription())
+                .price(product.getPrice())
+                .build();
+    }
+
+    public ProductResponse updateProduct(String id, ProductRequest productRequest) {
+        Product existingProduct = productRepository.findById(id)
+                .orElseThrow(() -> new ProductNotFoundException(id));
+
+        existingProduct.setName(productRequest.name());
+        existingProduct.setDescription(productRequest.description());
+        existingProduct.setPrice(productRequest.price());
+
+
+        Product updatedProduct = productRepository.save(existingProduct);
+
+        log.info("Updated product: {}", updatedProduct);
+        return ProductResponse.builder()
+                .id(updatedProduct.getId())
+                .name(updatedProduct.getName())
+                .description(updatedProduct.getDescription())
+                .price(updatedProduct.getPrice())
+                .build();
+    }
+
+
+    public void deleteProduct(String id) {
+
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ProductNotFoundException(id));
+
+        productRepository.delete(product);
+    }
+
+
 }

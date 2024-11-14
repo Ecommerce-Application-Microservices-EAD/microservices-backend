@@ -12,7 +12,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
@@ -50,7 +49,6 @@ class ProductServiceTests {
         assertEquals(BigDecimal.valueOf(999), response.price());
         verify(productRepository, times(1)).save(any(Product.class));
     }
-
 
     @Test
     void shouldGetAllProducts() {
@@ -111,18 +109,16 @@ class ProductServiceTests {
 
     @Test
     void shouldDeleteProductById() {
-
         Product product = new Product("1", "iphone 16", "new iphone", new BigDecimal("999"));
 
         when(productRepository.findById("1")).thenReturn(Optional.of(product));
         doNothing().when(productRepository).delete(product);
 
-
         productService.deleteProduct("1");
 
-
         verify(productRepository, times(1)).delete(product);
-}
+    }
+
     @Test
     void shouldThrowExceptionWhenDeletingNonexistentProduct() {
         when(productRepository.findById("1")).thenReturn(Optional.empty());

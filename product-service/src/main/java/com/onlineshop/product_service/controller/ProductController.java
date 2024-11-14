@@ -2,7 +2,6 @@ package com.onlineshop.product_service.controller;
 
 import com.onlineshop.product_service.dto.ProductRequest;
 import com.onlineshop.product_service.dto.ProductResponse;
-import com.onlineshop.product_service.model.Product;
 import com.onlineshop.product_service.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/product")
+@RequestMapping("/api/v1/product")
 @RequiredArgsConstructor
 @Slf4j
 public class ProductController {
@@ -36,6 +35,7 @@ public class ProductController {
         log.info("Fetching product with ID: {}", productId);
         return productService.getProductById(productId);
     }
+
     @PutMapping("/{productId}")
     @ResponseStatus(HttpStatus.OK)
     public ProductResponse updateProductById(@PathVariable String productId, @RequestBody ProductRequest productRequest) {
@@ -49,8 +49,4 @@ public class ProductController {
         log.info("Deleting product with ID: {}", productId);
         productService.deleteProduct(productId);
     }
-
-
-
-
 }

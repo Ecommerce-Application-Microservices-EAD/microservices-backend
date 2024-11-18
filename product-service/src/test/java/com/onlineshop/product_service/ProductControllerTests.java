@@ -49,7 +49,7 @@ public class ProductControllerTests {
                 .contentType("application/json")
                 .body(productRequest)
                 .when()
-                .post("/api/product")
+                .post("/api/v1/product")
                 .then()
                 .statusCode(HttpStatus.CREATED.value())
                 .body("id", Matchers.equalTo("1"))
@@ -69,11 +69,10 @@ public class ProductControllerTests {
                 .contentType("application/json")
                 .body(productRequest)
                 .when()
-                .post("/api/product")
+                .post("/api/v1/product")
                 .then()
                 .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
     }
-
 
     @Test
     void shouldGetAllProducts() {
@@ -86,7 +85,7 @@ public class ProductControllerTests {
         given()
                 .contentType("application/json")
                 .when()
-                .get("/api/product")
+                .get("/api/v1/product")
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .body("size()", Matchers.equalTo(2))
@@ -100,7 +99,6 @@ public class ProductControllerTests {
                 .body("[1].price", Matchers.equalTo(999));
     }
 
-
     @Test
     void shouldGetAllProductsFailure() {
         Mockito.when(productService.getAllProducts()).thenThrow(new RuntimeException("Database error"));
@@ -108,7 +106,7 @@ public class ProductControllerTests {
         given()
                 .contentType("application/json")
                 .when()
-                .get("/api/product")
+                .get("/api/v1/product")
                 .then()
                 .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
     }
@@ -121,7 +119,7 @@ public class ProductControllerTests {
         given()
                 .contentType("application/json")
                 .when()
-                .get("/api/product/1")
+                .get("/api/v1/product/1")
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .body("id", Matchers.equalTo("1"))
@@ -132,19 +130,17 @@ public class ProductControllerTests {
 
     @Test
     void shouldGetProductByIdFailure() {
-
         Mockito.when(productService.getProductById("1"))
                 .thenThrow(new ProductNotFoundException("Product not found"));
 
         given()
                 .contentType("application/json")
                 .when()
-                .get("/api/product/1")
+                .get("/api/v1/product/1")
                 .then()
                 .statusCode(HttpStatus.NOT_FOUND.value())
                 .body("message", Matchers.equalTo("Product not found"));
     }
-
 
     @Test
     void shouldUpdateProductById() {
@@ -157,7 +153,7 @@ public class ProductControllerTests {
                 .contentType("application/json")
                 .body(updateRequest)
                 .when()
-                .put("/api/product/1")
+                .put("/api/v1/product/1")
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .body("id", Matchers.equalTo("1"))
@@ -171,15 +167,16 @@ public class ProductControllerTests {
         ProductRequest updateRequest = new ProductRequest("iphone 16", "updated iphone", new BigDecimal("1099"));
 
         Mockito.when(productService.updateProduct(anyString(), any(ProductRequest.class)))
-                .thenThrow(new RuntimeException("Update failed"));
+                .thenThrow(new ProductNotFoundException("Product not found"));
 
         given()
                 .contentType("application/json")
                 .body(updateRequest)
                 .when()
-                .put("/api/product/1")
+                .put("/api/v1/product/1")
                 .then()
-                .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+                .statusCode(HttpStatus.NOT_FOUND.value())
+                .body("message", Matchers.equalTo("Product not found"));
     }
 
     @Test
@@ -189,7 +186,7 @@ public class ProductControllerTests {
         given()
                 .contentType("application/json")
                 .when()
-                .delete("/api/product/1")
+                .delete("/api/v1/product/1")
                 .then()
                 .statusCode(HttpStatus.NO_CONTENT.value());
     }
@@ -201,7 +198,7 @@ public class ProductControllerTests {
         given()
                 .contentType("application/json")
                 .when()
-                .delete("/api/product/1")
+                .delete("/api/v1/product/1")
                 .then()
                 .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
     }

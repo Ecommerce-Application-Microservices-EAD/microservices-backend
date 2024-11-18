@@ -10,13 +10,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/order")
+@RequestMapping("/api/v1/order")
 @RequiredArgsConstructor
 public class OrderController {
 
-
     private final OrderService orderService;
-
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -27,5 +25,15 @@ public class OrderController {
     @GetMapping
     public List<OrderResponse> getOrders() {
         return orderService.getOrders();
+    }
+
+    @GetMapping("/{orderId}")
+    public OrderResponse getOrderByOrderId(@PathVariable Long orderId){
+        return orderService.getOrderByOrderId(orderId);
+    }
+
+    @GetMapping("/user/{userId}")
+    public List<OrderResponse> getOrderByUserId(@PathVariable String userId){
+        return orderService.getOrderByUserId(userId);
     }
 }

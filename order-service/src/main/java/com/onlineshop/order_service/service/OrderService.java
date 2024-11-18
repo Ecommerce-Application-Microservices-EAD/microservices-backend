@@ -3,6 +3,7 @@ package com.onlineshop.order_service.service;
 import com.onlineshop.order_service.client.InventoryClient;
 import com.onlineshop.order_service.dto.OrderRequest;
 import com.onlineshop.order_service.dto.OrderResponse;
+import com.onlineshop.order_service.exception.OrderNotFoundException;
 import com.onlineshop.order_service.model.Order;
 import com.onlineshop.order_service.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
@@ -56,5 +57,35 @@ throw new RuntimeException("Product "+orderRequest.skuCode()+" not in stock");
                         .build())
                 .toList();
 
+    }
+
+    public OrderResponse getOrderByOrderId(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(()-> new OrderNotFoundException("Order with Id + " + orderId + "Not Found"));
+        return OrderResponse.builder()
+                .id(order.getId())
+                .orderNumber(order.getOrderNumber())
+                .skuCode(order.getSkuCode())
+                .price(order.getPrice())
+                .quantity(order.getQuantity())
+                .userId(order.getUserId())
+                .build();
+    }
+
+    public List<OrderResponse> getOrderByUserId(String userId) {
+        List<Order> orders = orderRepository.findByUserId(userId);
+        if (orders.isEmpty()){
+            throw  new OrderNotFoundException("No Orders found for user with Id " + userId);
+        }
+        return orders.stream()
+                .map(order -> OrderResponse.builder()
+                        .id(order.getId())
+                        .orderNumber(order.getOrderNumber())
+                        .skuCode(order.getSkuCode())
+                        .price(order.getPrice())
+                        .quantity(order.getQuantity())
+                        .userId(order.getUserId())
+                        .build())
+                .toList();
     }
 }

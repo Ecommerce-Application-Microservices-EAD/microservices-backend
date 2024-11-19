@@ -15,8 +15,8 @@ public class PaymentService {
     @Autowired
     private PaymentRepository paymentRepository;
 
-    public String createPayment(Long amount, String currency) {
-        System.out.println("createPayment: " + amount + ", " + currency);
+    public String createPayment(Long amount, String currency, String userId) {
+        System.out.println("createPayment: " + amount + ", " + currency + ", " + userId);
         // Create a PaymentIntent with Stripe
         PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
                 .setAmount(amount)
@@ -30,7 +30,7 @@ public class PaymentService {
             // System.out.println("paymentIntent: " + paymentIntent);
 
             // Save payment details to MongoDB
-            Payment payment = new Payment(currency, amount, "pending", paymentIntent.getId());
+            Payment payment = new Payment(currency, amount, "pending", paymentIntent.getId(), userId);
             paymentRepository.save(payment);
 
             return payment.getId() + ", " + paymentIntent.getClientSecret();
@@ -55,10 +55,11 @@ public class PaymentService {
     }
 
     public void confirmPayment(String paymentId) throws Exception {
+        System.out.println("confirmPayment: " + paymentId);
         Payment payment = paymentRepository.findById(paymentId).orElse(null);
         if (payment != null) {
-            PaymentIntent paymentIntent = PaymentIntent.retrieve(payment.getStripePaymentId());
-            paymentIntent.confirm();
+            /* PaymentIntent paymentIntent = PaymentIntent.retrieve(payment.getStripePaymentId());
+            paymentIntent.confirm(); */
             payment.setStatus("confirmed");
             paymentRepository.save(payment);
         }

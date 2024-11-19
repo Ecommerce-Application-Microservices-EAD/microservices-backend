@@ -38,17 +38,25 @@ public class PaymentController {
     public ResponseEntity<Map<String, String>> createPayment(@RequestBody Map<String, Object> paymentData) {
         try {
             System.out.println('1');
+
             Long amount = Long.valueOf(paymentData.get("amount").toString());
             String currency = paymentData.get("currency").toString();
+            String userId = paymentData.get("userId").toString();
+
             System.out.println("amount: " + amount);
-            System.out.println("currency: " + currency);
-            String res = paymentService.createPayment(amount, currency);
+            //System.out.println("currency: " + currency);
+            System.out.println("userId: " + userId);
+
+            String res = paymentService.createPayment(amount, currency, userId);
+
           //  System.out.println("res: " + res);
             String[] parts = res.split(", ");
             String clientSecret = parts[1];
             String paymentId = parts[0];
+
             System.out.println("clientSecret: " + clientSecret);
             System.out.println("paymentId: " + paymentId);
+
             return ResponseEntity.ok(Map.of("clientSecret", clientSecret, "paymentId", paymentId));
         } catch (Exception e) {
             e.printStackTrace();

@@ -21,12 +21,14 @@ public class Payment {
     private Long amount;
     private String status;
     private String stripePaymentId;
+    private String userId;
 
     // constructors
-    public Payment(String currency, Long amount, String status, String stripePaymentId) {
+    public Payment(String currency, Long amount, String status, String stripePaymentId, String userId) {
         this.currency = currency;
         this.amount = amount;
         this.status = status;
         this.stripePaymentId = stripePaymentId;
+        this.userId = userId;
     }
 }

@@ -48,19 +48,20 @@ public class CartService {
     }
 
 
-    public boolean removeItem(String userId, String productId) {
+    public boolean clearCart(String userId) {
+        // Find the cart by userId
         Cart cart = cartRepository.findByUserId(userId).orElse(null);
-
+    
         if (cart != null) {
-            boolean removed = cart.getItems().removeIf(item -> item.getProductId().equals(productId));
-
-            if (removed) {
-                cartRepository.save(cart);
-            }
-            return removed;
+            // Clear all items in the cart
+            cart.getItems().clear();
+            // Save the updated cart
+            cartRepository.save(cart);
+            return true; 
         }
-
-        return false;
+    
+        return false; // Indicates no cart was found for the user
     }
     
+
 }

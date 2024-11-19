@@ -51,6 +51,7 @@ public class PaymentController {
             System.out.println("paymentId: " + paymentId);
             return ResponseEntity.ok(Map.of("clientSecret", clientSecret, "paymentId", paymentId));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
         }
     }

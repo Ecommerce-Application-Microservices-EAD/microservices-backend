@@ -26,6 +26,7 @@ public class CartController {
 
     @PostMapping("/add")
     public ResponseEntity<String> addToCart(@RequestBody Item item) {
+        System.out.println("Item: " + item);
         cartService.addItem(item);
         return ResponseEntity.ok("Item added to cart successfully");
     }
@@ -40,13 +41,13 @@ public class CartController {
         }
     }
 
-    @DeleteMapping("/remove")
-    public ResponseEntity<String> removeItem(@RequestParam String userId, @RequestParam String productId) {
-        boolean removed = cartService.removeItem(userId, productId);
-        if (removed) {
-            return ResponseEntity.ok("Item removed from cart successfully");
+    @DeleteMapping("/clear")
+    public ResponseEntity<String> clearCart(@RequestParam String userId) {
+        boolean cleared = cartService.clearCart(userId);
+        if (cleared) {
+            return ResponseEntity.ok("Cart cleared successfully");
         } else {
-            return ResponseEntity.status(404).body("Item or Cart not found");
+            return ResponseEntity.status(404).body("Cart not found for user");
         }
     }
 

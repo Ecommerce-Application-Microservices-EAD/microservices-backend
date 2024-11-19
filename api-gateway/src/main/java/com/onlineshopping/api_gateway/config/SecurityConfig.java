@@ -46,7 +46,7 @@ public class SecurityConfig {
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers(AUTH_WHITELIST).permitAll()
                         .pathMatchers("/api/auth/**", "/api/user/**").permitAll()
-                        .pathMatchers(HttpMethod.GET, "/api/v1/product", "/api/v1/product/{productId}", "/api/v1/product/categories", "/api/v1/product/search").hasAnyRole("USER", "ADMIN")
+                        .pathMatchers(HttpMethod.GET, "/api/v1/product", "/api/v1/product/{productId}", "/api/v1/product/categories", "/api/v1/product/search").permitAll()
                         .pathMatchers(HttpMethod.POST, "/api/v1/product").hasRole("ADMIN")
                         .pathMatchers(HttpMethod.PUT, "/api/v1/product/{productId}").hasRole("ADMIN")
                         .pathMatchers(HttpMethod.DELETE, "/api/v1/product/{productId}").hasRole("ADMIN")

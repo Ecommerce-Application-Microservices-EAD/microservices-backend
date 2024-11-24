@@ -10,8 +10,9 @@ import lombok.Data;
 import org.springframework.stereotype.Service;
 import com.onlineshop.product_service.exception.ProductNotFoundException;
 
-
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.Collections;
 
 @Service
 @RequiredArgsConstructor
@@ -24,14 +25,23 @@ public class ProductService {
                 .name(productRequest.name())
                 .description(productRequest.description())
                 .price(productRequest.price())
+                .category(productRequest.category())
                 .build();
-        productRepository.save(product);
-        log.info("Saving product: {}", product);
+        Product savedProduct = productRepository.save(product);
+        log.info("Saving product: {}", savedProduct);
+        return mapToProductResponse(savedProduct);
+    }
+
+    private ProductResponse mapToProductResponse(Product product) {
+        if (product == null) {
+            throw new IllegalArgumentException("Product cannot be null");
+        }
         return ProductResponse.builder()
                 .id(product.getId())
                 .name(product.getName())
                 .description(product.getDescription())
                 .price(product.getPrice())
+                .category(product.getCategory()) // Make sure this is included
                 .build();
     }
 
@@ -39,25 +49,14 @@ public class ProductService {
         List<Product> products = productRepository.findAll();
         log.info("Retrieving all products: {}", products);
         return products.stream()
-                .map(product -> ProductResponse.builder()
-                        .id(product.getId())
-                        .name(product.getName())
-                        .description(product.getDescription())
-                        .price(product.getPrice())
-                        .build())
+                .map(this::mapToProductResponse)
                 .toList();
     }
 
     public ProductResponse getProductById(String id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException(id));
-
-        return ProductResponse.builder()
-                .id(product.getId())
-                .name(product.getName())
-                .description(product.getDescription())
-                .price(product.getPrice())
-                .build();
+        return mapToProductResponse(product);
     }
 
     public ProductResponse updateProduct(String id, ProductRequest productRequest) {
@@ -67,19 +66,13 @@ public class ProductService {
         existingProduct.setName(productRequest.name());
         existingProduct.setDescription(productRequest.description());
         existingProduct.setPrice(productRequest.price());
-
+        existingProduct.setCategory(productRequest.category());
 
         Product updatedProduct = productRepository.save(existingProduct);
 
         log.info("Updated product: {}", updatedProduct);
-        return ProductResponse.builder()
-                .id(updatedProduct.getId())
-                .name(updatedProduct.getName())
-                .description(updatedProduct.getDescription())
-                .price(updatedProduct.getPrice())
-                .build();
+        return mapToProductResponse(updatedProduct);
     }
-
 
     public void deleteProduct(String id) {
 
@@ -89,5 +82,27 @@ public class ProductService {
         productRepository.delete(product);
     }
 
+    public List<String> getAllCategories() {
+        List<String> categories = productRepository.findDistinctCategories();
+        if (categories.isEmpty()) {
+            log.warn("No categories found");
+            return Collections.emptyList();
+        }
+        return categories;
+    }
+
+    public List<ProductResponse> searchProducts(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            throw new IllegalArgumentException("Search keyword cannot be empty");
+        }
+
+        List<Product> products = productRepository
+                .findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
+                        keyword.trim(), keyword.trim());
+
+        return products.stream()
+                .map(this::mapToProductResponse)
+                .collect(Collectors.toList());
+    }
 
 }

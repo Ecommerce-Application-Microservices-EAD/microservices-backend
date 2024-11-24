@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.Operation;
 
 import java.util.List;
 
@@ -48,5 +49,22 @@ public class ProductController {
     public void deleteProductById(@PathVariable String productId) {
         log.info("Deleting product with ID: {}", productId);
         productService.deleteProduct(productId);
+    }
+
+    
+    @Operation(summary = "Fetch all product categories")
+    @GetMapping("/categories")
+    @ResponseStatus(HttpStatus.OK)
+    public List<String> getProductCategories() {
+        log.info("Fetching all product categories");
+        return productService.getAllCategories();
+    }
+
+    @Operation(summary = "Search for products by keyword")
+    @GetMapping("/search")
+    @ResponseStatus(HttpStatus.OK)
+    public List<ProductResponse> searchProducts(@RequestParam String keyword) {
+        log.info("Searching for products with keyword: {}", keyword);
+        return productService.searchProducts(keyword);
     }
 }

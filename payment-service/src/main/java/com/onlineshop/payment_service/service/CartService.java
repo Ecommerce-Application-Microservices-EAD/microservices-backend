@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class CartService {
@@ -63,5 +64,32 @@ public class CartService {
         return false; // Indicates no cart was found for the user
     }
     
+
+    public String removeItemFromCart(String userId, String productId) {
+        System.out.println("userId: " + userId + " productId: " + productId);
+        Cart cart = cartRepository.findByUserId(userId).orElse(null);
+        System.out.println("Cart: " + cart);
+        if (cart != null) {
+            List<Item> items = cart.getItems();
+            for (int i = 0; i < items.size(); i++) {
+                if (items.get(i).getProductId().equals(productId)) {
+                    items.remove(i);
+                    cartRepository.save(cart);
+                    return "Item removed from cart successfully";
+                }
+            }
+
+            System.out.println("Item not found in cart");
+
+            return "Item not found in cart";
+
+        } else {
+            System.out.println("Cart not found for user");
+            return "Cart not found for user";
+        }
+
+
+    }
+
 
 }

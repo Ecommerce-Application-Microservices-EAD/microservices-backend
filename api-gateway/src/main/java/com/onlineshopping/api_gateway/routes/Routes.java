@@ -15,7 +15,7 @@ public class Routes {
         log.info("Configuring gateway routes...");
 
         RouteLocator routeLocator = builder.routes()
-                .route("product-service", r -> r.path("/api/v1/product/**")
+                .route("product-service", r -> r.path("/api/v1/products/**")
                         .uri("http://localhost:8080"))
                 .route("order-service", r -> r.path("/api/v1/order/**")
                         .uri("http://localhost:8081"))

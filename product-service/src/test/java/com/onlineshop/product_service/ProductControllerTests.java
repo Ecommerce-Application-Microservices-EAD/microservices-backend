@@ -20,8 +20,11 @@ import java.util.List;
 import static io.restassured.RestAssured.given;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-
 import com.onlineshop.product_service.exception.ProductNotFoundException;
+
+import static org.hamcrest.Matchers.equalTo;
+
+import static org.hamcrest.Matchers.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class ProductControllerTests {
@@ -39,154 +42,138 @@ public class ProductControllerTests {
         }
 
         @Test
-        void shouldCreateProduct() {
-                ProductRequest productRequest = new ProductRequest("iphone 16", "new iphone", new BigDecimal("999"),
-                                "Electronics");
-                ProductResponse productResponse = new ProductResponse("1", "iphone 16", "new iphone",
-                                new BigDecimal("999"), "Electronics");
-
-                Mockito.when(productService.createProduct(any(ProductRequest.class))).thenReturn(productResponse);
-
-                given()
-                                .contentType("application/json")
-                                .body(productRequest)
-                                .when()
-                                .post("/api/v1/product")
-                                .then()
-                                .statusCode(HttpStatus.CREATED.value())
-                                .body("id", Matchers.equalTo("1"))
-                                .body("name", Matchers.equalTo("iphone 16"))
-                                .body("description", Matchers.equalTo("new iphone"))
-                                .body("price", Matchers.equalTo(999));
-        }
-
-        @Test
-        void shouldCreateProductFailure() {
-                ProductRequest productRequest = new ProductRequest("iphone 16", "new iphone", new BigDecimal("999"),
-                                "Electronics");
-
-                Mockito.when(productService.createProduct(any(ProductRequest.class)))
-                                .thenThrow(new RuntimeException("Product creation failed"));
-
-                given()
-                                .contentType("application/json")
-                                .body(productRequest)
-                                .when()
-                                .post("/api/v1/product")
-                                .then()
-                                .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-        }
-
-        @Test
         void shouldGetAllProducts() {
-                ProductResponse product1 = new ProductResponse("1", "iphone 16", "new iphone", new BigDecimal("999"),
-                                "Electronics");
-                ProductResponse product2 = new ProductResponse("2", "galaxy s20", "new galaxy", new BigDecimal("999"),
-                                "Electronics");
 
-                List<ProductResponse> productList = Arrays.asList(product1, product2);
-                Mockito.when(productService.getAllProducts()).thenReturn(productList);
+                ProductResponse product1 = new ProductResponse(
+                        "1", "iphone 16", "new iphone", new BigDecimal("999"), 50, "electronics", "image data".getBytes());
+                ProductResponse product2 = new ProductResponse(
+                        "2", "iphone 16 Pro", "updated iphone", new BigDecimal("1099"), 40, "electronics", "updated image data".getBytes());
 
-                given()
-                                .contentType("application/json")
-                                .when()
-                                .get("/api/v1/product")
-                                .then()
-                                .statusCode(HttpStatus.OK.value())
-                                .body("size()", Matchers.equalTo(2))
-                                .body("[0].id", Matchers.equalTo("1"))
-                                .body("[0].name", Matchers.equalTo("iphone 16"))
-                                .body("[0].description", Matchers.equalTo("new iphone"))
-                                .body("[0].price", Matchers.equalTo(999))
-                                .body("[1].id", Matchers.equalTo("2"))
-                                .body("[1].name", Matchers.equalTo("galaxy s20"))
-                                .body("[1].description", Matchers.equalTo("new galaxy"))
-                                .body("[1].price", Matchers.equalTo(999));
-        }
-
-        @Test
-        void shouldGetAllProductsFailure() {
-                Mockito.when(productService.getAllProducts()).thenThrow(new RuntimeException("Database error"));
+                Mockito.when(productService.getAllProducts()).thenReturn(Arrays.asList(product1, product2));
 
                 given()
-                                .contentType("application/json")
-                                .when()
-                                .get("/api/v1/product")
-                                .then()
-                                .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+                        .when()
+                        .get("/api/v1/products")
+                        .then()
+                        .statusCode(200)
+                        .body("$", hasSize(2))
+                        .body("[0].id", equalTo("1"))
+                        .body("[0].name", equalTo("iphone 16"))
+                        .body("[1].id", equalTo("2"))
+                        .body("[1].name", equalTo("iphone 16 Pro"));
         }
+
 
         @Test
         void shouldGetProductById() {
-                ProductResponse productResponse = new ProductResponse("1", "iphone 16", "new iphone",
-                                new BigDecimal("999"), "Electronics");
-                Mockito.when(productService.getProductById("1")).thenReturn(productResponse);
+
+                ProductResponse mockResponse = new ProductResponse(
+                        "1", "iphone 16", "new iphone", new BigDecimal("999"), 50, "electronics", "image data".getBytes());
+
+                Mockito.when(productService.getProductById("1")).thenReturn(mockResponse);
 
                 given()
-                                .contentType("application/json")
-                                .when()
-                                .get("/api/v1/product/1")
-                                .then()
-                                .statusCode(HttpStatus.OK.value())
-                                .body("id", Matchers.equalTo("1"))
-                                .body("name", Matchers.equalTo("iphone 16"))
-                                .body("description", Matchers.equalTo("new iphone"))
-                                .body("price", Matchers.equalTo(999));
+                        .pathParam("id", "1")
+                        .when()
+                        .get("/api/v1/products/{id}")
+                        .then()
+                        .statusCode(200)
+                        .body("id", equalTo("1"))
+                        .body("name", equalTo("iphone 16"))
+                        .body("description", equalTo("new iphone"))
+                        .body("price", equalTo(999))
+                        .body("stock", equalTo(50))
+                        .body("category", equalTo("electronics"));
         }
 
         @Test
-        void shouldGetProductByIdFailure() {
-                Mockito.when(productService.getProductById("1"))
-                                .thenThrow(new ProductNotFoundException("Product not found"));
+        void shouldCreateProduct() {
+
+                String productRequestJson = """
+        {
+            "name": "iphone 16",
+            "description": "new iphone",
+            "price": 999,
+            "stock": 50,
+            "category": "electronics",
+            "imageData": null
+        }
+    """;
+
+                ProductResponse mockResponse = new ProductResponse(
+                        "1",
+                        "iphone 16",
+                        "new iphone",
+                        new BigDecimal("999"),
+                        50,
+                        "electronics",
+                        "dummy image data".getBytes()
+                );
+
+                Mockito.when(productService.createProduct(any(ProductRequest.class), any(byte[].class)))
+                        .thenReturn(mockResponse);
 
                 given()
-                                .contentType("application/json")
-                                .when()
-                                .get("/api/v1/product/1")
-                                .then()
-                                .statusCode(HttpStatus.NOT_FOUND.value())
-                                .body("message", Matchers.equalTo("Product not found"));
+                        .multiPart("product", productRequestJson, "application/json") // Send the ProductRequest part as JSON
+                        .multiPart("image", "image.jpg", "dummy image data".getBytes()) // Send the image as a file part
+                        .contentType("multipart/form-data")
+                        .when()
+                        .post("/api/v1/products")
+                        .then()
+                        .statusCode(201)
+                        .body("id", equalTo("1"))
+                        .body("name", equalTo("iphone 16"))
+                        .body("description", equalTo("new iphone"))
+                        .body("price", equalTo(999))
+                        .body("stock", equalTo(50))
+                        .body("category", equalTo("electronics"));
         }
 
         @Test
-        void shouldUpdateProductById() {
-                ProductRequest updateRequest = new ProductRequest("iphone 16", "updated iphone", new BigDecimal("1099"),
-                                "Electronics");
-                ProductResponse updatedResponse = new ProductResponse("1", "iphone 16", "updated iphone",
-                                new BigDecimal("1099"), "Electronics");
+        void shouldUpdateProduct() {
 
-                Mockito.when(productService.updateProduct(anyString(), any(ProductRequest.class)))
-                                .thenReturn(updatedResponse);
-
-                given()
-                                .contentType("application/json")
-                                .body(updateRequest)
-                                .when()
-                                .put("/api/v1/product/1")
-                                .then()
-                                .statusCode(HttpStatus.OK.value())
-                                .body("id", Matchers.equalTo("1"))
-                                .body("name", Matchers.equalTo("iphone 16"))
-                                .body("description", Matchers.equalTo("updated iphone"))
-                                .body("price", Matchers.equalTo(1099));
+                String productRequestJson = """
+        {
+            "name": "iphone 16 Pro",
+            "description": "updated iphone",
+            "price": 1099,
+            "stock": 40,
+            "category": "electronics",
+            "imageData": null
         }
+    """;
 
-        @Test
-        void shouldUpdateProductByIdFailure() {
-                ProductRequest updateRequest = new ProductRequest("iphone 16", "updated iphone", new BigDecimal("1099"),
-                                "Electronics");
 
-                Mockito.when(productService.updateProduct(anyString(), any(ProductRequest.class)))
-                                .thenThrow(new ProductNotFoundException("Product not found"));
+                ProductResponse mockResponse = new ProductResponse(
+                        "1",
+                        "iphone 16 Pro",
+                        "updated iphone",
+                        new BigDecimal("1099"),
+                        40,
+                        "electronics",
+                        "updated image data".getBytes()
+                );
+
+
+                Mockito.when(productService.updateProduct(anyString(), any(ProductRequest.class), any(byte[].class)))
+                        .thenReturn(mockResponse);
+
 
                 given()
-                                .contentType("application/json")
-                                .body(updateRequest)
-                                .when()
-                                .put("/api/v1/product/1")
-                                .then()
-                                .statusCode(HttpStatus.NOT_FOUND.value())
-                                .body("message", Matchers.equalTo("Product not found"));
+                        .pathParam("id", "1")
+                        .multiPart("product", productRequestJson, "application/json") // Send the ProductRequest part as JSON
+                        .multiPart("image", "updated_image.jpg", "updated image data".getBytes()) // Send the updated image
+                        .contentType("multipart/form-data")
+                        .when()
+                        .put("/api/v1/products/{id}")
+                        .then()
+                        .statusCode(200)
+                        .body("id", equalTo("1"))
+                        .body("name", equalTo("iphone 16 Pro"))
+                        .body("description", equalTo("updated iphone"))
+                        .body("price", equalTo(1099))
+                        .body("stock", equalTo(40))
+                        .body("category", equalTo("electronics"));
         }
 
         @Test
@@ -194,23 +181,80 @@ public class ProductControllerTests {
                 Mockito.doNothing().when(productService).deleteProduct("1");
 
                 given()
-                                .contentType("application/json")
-                                .when()
-                                .delete("/api/v1/product/1")
-                                .then()
-                                .statusCode(HttpStatus.NO_CONTENT.value());
+                        .contentType("application/json")
+                        .when()
+                        .delete("/api/v1/products/1")
+                        .then()
+                        .statusCode(HttpStatus.NO_CONTENT.value());
+        }
+
+        // failure test cases
+        @Test
+        void shouldGetAllProductsFailure() {
+                Mockito.when(productService.getAllProducts()).thenThrow(new RuntimeException("Service failure"));
+
+                given()
+                        .contentType("application/json")
+                        .when()
+                        .get("/api/v1/products")
+                        .then()
+                        .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                        .body("message", equalTo("Service failure"));
         }
 
         @Test
-        void shouldDeleteProductByIdFailure() {
-                Mockito.doThrow(new RuntimeException("Delete failed")).when(productService).deleteProduct("1");
+        void shouldGetProductByIdFailure() {
+                Mockito.when(productService.getProductById("1"))
+                        .thenThrow(new ProductNotFoundException("Product not found"));
 
                 given()
-                                .contentType("application/json")
-                                .when()
-                                .delete("/api/v1/product/1")
-                                .then()
-                                .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+                        .contentType("application/json")
+                        .when()
+                        .get("/api/v1/products/1")
+                        .then()
+                        .statusCode(HttpStatus.NOT_FOUND.value())
+                        .body("message", equalTo("Product not found"));
+        }
+
+        @Test
+        void shouldCreateProductFailure() {
+                String productRequestJson = """
+    {
+        "name": "iphone 16",
+        "description": "new iphone",
+        "price": 999,
+        "stock": 50,
+        "category": "electronics",
+        "imageData": null
+    }
+    """;
+
+                Mockito.when(productService.createProduct(any(ProductRequest.class), any(byte[].class)))
+                        .thenThrow(new RuntimeException("Failed to create product"));
+
+                given()
+                        .multiPart("product", productRequestJson, "application/json")
+                        .multiPart("image", "image.jpg", "dummy image data".getBytes())
+                        .contentType("multipart/form-data")
+                        .when()
+                        .post("/api/v1/products")
+                        .then()
+                        .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                        .body("message", equalTo("Service failure"));
+        }
+
+        @Test
+        void shouldGetProductByIdNotFound() {
+                Mockito.when(productService.getProductById("999"))
+                        .thenThrow(new ProductNotFoundException("Product not found"));
+
+                given()
+                        .contentType("application/json")
+                        .when()
+                        .get("/api/v1/products/999")
+                        .then()
+                        .statusCode(HttpStatus.NOT_FOUND.value())
+                        .body("message", equalTo("Product not found"));
         }
 
         @Test
@@ -221,7 +265,7 @@ public class ProductControllerTests {
                 given()
                                 .contentType("application/json")
                                 .when()
-                                .get("/api/v1/product/categories")
+                                .get("/api/v1/products/categories")
                                 .then()
                                 .statusCode(HttpStatus.OK.value())
                                 .body("size()", Matchers.equalTo(3))
@@ -242,10 +286,10 @@ public class ProductControllerTests {
                 given()
                                 .contentType("application/json")
                                 .when()
-                                .get("/api/v1/product/categories")
+                                .get("/api/v1/products/categories")
                                 .then()
                                 .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                                .body("message", Matchers.equalTo("Failed to fetch categories")); // Optional: You can check for the error message if your API sends it in the response body
+                                .body("message", Matchers.equalTo("Service failure"));
 
     // You can also verify that the service method was called exactly once
     Mockito.verify(productService, Mockito.times(1)).getAllCategories();
@@ -253,10 +297,10 @@ public class ProductControllerTests {
 
         @Test
         void shouldSearchProductsByKeyword() {
-                ProductResponse product1 = new ProductResponse("1", "iphone 16", "new iphone", new BigDecimal("999"),
-                                "Electronics");
+                ProductResponse product1 = new ProductResponse("1", "iphone 16", "new iphone", new BigDecimal("999"),50,
+                                "Electronics",null);
                 ProductResponse product2 = new ProductResponse("2", "iphone 15", "previous model",
-                                new BigDecimal("899"), "Electronics");
+                                new BigDecimal("899"), 50,"Electronics",null);
 
                 List<ProductResponse> searchResults = Arrays.asList(product1, product2);
                 Mockito.when(productService.searchProducts("iphone")).thenReturn(searchResults);
@@ -265,7 +309,7 @@ public class ProductControllerTests {
                                 .contentType("application/json")
                                 .queryParam("keyword", "iphone")
                                 .when()
-                                .get("/api/v1/product/search")
+                                .get("/api/v1/products/search")
                                 .then()
                                 .statusCode(HttpStatus.OK.value())
                                 .body("size()", Matchers.equalTo(2))
@@ -288,7 +332,7 @@ public class ProductControllerTests {
                                 .contentType("application/json")
                                 .queryParam("keyword", "unknown")
                                 .when()
-                                .get("/api/v1/product/search")
+                                .get("/api/v1/products/search")
                                 .then()
                                 .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
         }

@@ -2,35 +2,43 @@ package com.onlineshop.payment_service.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.onlineshop.payment_service.model.Cart;
 import com.onlineshop.payment_service.model.Item;
 import com.onlineshop.payment_service.service.CartService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api/v1/cart")
 @CrossOrigin(origins = "http://localhost:3000")
 public class CartController {
 
+    private static final Logger logger = LoggerFactory.getLogger(CartController.class);
+
     @Autowired
     private CartService cartService;
 
+    /**
+     * Adds an item to the cart.
+     *
+     * @param item the item to add
+     * @return the response entity with a success message
+     */
     @PostMapping("/add")
     public ResponseEntity<String> addToCart(@RequestBody Item item) {
-        // System.out.println("Item: " + item);
+        logger.info("Adding item to cart: {}", item);
         cartService.addItem(item);
         return ResponseEntity.ok("Item added to cart successfully");
     }
 
+    /**
+     * Retrieves the cart by user ID.
+     *
+     * @param userId the user ID
+     * @return the response entity with the cart
+     */
     @GetMapping("/{userId}")
     public ResponseEntity<Cart> getCartByUserId(@PathVariable String userId) {
         Cart cart = cartService.getCartByUserId(userId);
@@ -41,6 +49,12 @@ public class CartController {
         }
     }
 
+    /**
+     * Clears the cart for a user.
+     *
+     * @param userId the user ID
+     * @return the response entity with a success or error message
+     */
     @DeleteMapping("/clear")
     public ResponseEntity<String> clearCart(@RequestParam String userId) {
         boolean cleared = cartService.clearCart(userId);
@@ -51,18 +65,25 @@ public class CartController {
         }
     }
 
+    /**
+     * Removes an item from the cart.
+     *
+     * @param productId the product ID
+     * @param userId    the user ID
+     * @return the response entity with a success or error message
+     */
     @DeleteMapping("/remove/{productId}")
     public ResponseEntity<String> removeFromCart(@PathVariable String productId, @RequestParam String userId) {
-        System.out.println("productId: " + productId + " userId: " + userId);
+        logger.info("Removing item from cart: productId={}, userId={}", productId, userId);
         String res = cartService.removeItemFromCart(userId, productId);
 
-        if (res.equals("Item removed from cart successfully")) {
-            return ResponseEntity.ok("Item removed from cart successfully");
-        } else if (res.equals("Item not found in cart")) {
-            return ResponseEntity.status(404).body("Item not found in cart");
-        } else {
-            return ResponseEntity.status(404).body("Cart not found for user");
+        switch (res) {
+            case "Item removed from cart successfully":
+                return ResponseEntity.ok("Item removed from cart successfully");
+            case "Item not found in cart":
+                return ResponseEntity.status(404).body("Item not found in cart");
+            default:
+                return ResponseEntity.status(404).body("Cart not found for user");
         }
     }
-
 }

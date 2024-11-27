@@ -1,5 +1,3 @@
-// src/main/java/com//paymentservice/controller/PaymentController.java
-
 package com.onlineshop.payment_service.controller;
 
 import com.onlineshop.payment_service.model.Payment;
@@ -10,60 +8,50 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api/payments")
 @CrossOrigin(origins = "http://localhost:3000")
 public class PaymentController {
 
+    private static final Logger logger = LoggerFactory.getLogger(PaymentController.class);
+
     @Autowired
     private PaymentService paymentService;
 
-    /*
-     * @PostMapping("/create")
-     * public ResponseEntity<String> createPayment(@RequestBody Map<String, Object>
-     * paymentData) {
-     * try {
-     * Long amount = Long.valueOf(paymentData.get("amount").toString());
-     * String currency = paymentData.get("currency").toString();
-     * String clientSecret = paymentService.createPayment(amount, currency);
-     * return ResponseEntity.ok(clientSecret);
-     * } catch (Exception e) {
-     * return ResponseEntity.status(500).body(e.getMessage());
-     * }
-     * }
+    /**
+     * Creates a payment.
+     *
+     * @param paymentData the payment data
+     * @return the response entity with client secret and payment ID
      */
-
     @PostMapping("/create")
     public ResponseEntity<Map<String, String>> createPayment(@RequestBody Map<String, Object> paymentData) {
         try {
-            // System.out.println('1');
-
             Long amount = Long.valueOf(paymentData.get("amount").toString());
             String currency = paymentData.get("currency").toString();
             String userId = paymentData.get("userId").toString();
 
-            // System.out.println("amount: " + amount);
-            // System.out.println("currency: " + currency);
-            // System.out.println("userId: " + userId);
-
             String res = paymentService.createPayment(amount, currency, userId);
-
-        //    System.out.println("res: " + res);
             String[] parts = res.split(", ");
             String clientSecret = parts[1];
             String paymentId = parts[0];
 
-            // System.out.println("clientSecret: " + clientSecret);
-            // System.out.println("paymentId: " + paymentId);
-
             return ResponseEntity.ok(Map.of("clientSecret", clientSecret, "paymentId", paymentId));
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error creating payment", e);
             return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
         }
     }
 
+    /**
+     * Retrieves a payment by ID.
+     *
+     * @param id the payment ID
+     * @return the response entity with the payment
+     */
     @GetMapping("/{id}")
     public ResponseEntity<Payment> getPayment(@PathVariable String id) {
         Payment payment = paymentService.getPayment(id);
@@ -74,6 +62,13 @@ public class PaymentController {
         }
     }
 
+    /**
+     * Updates the status of a payment.
+     *
+     * @param id the payment ID
+     * @param statusData the status data
+     * @return the response entity with the updated payment
+     */
     @PutMapping("/{id}/status")
     public ResponseEntity<Payment> updatePaymentStatus(@PathVariable String id,
             @RequestBody Map<String, String> statusData) {
@@ -86,22 +81,36 @@ public class PaymentController {
         }
     }
 
+    /**
+     * Confirms a payment.
+     *
+     * @param id the payment ID
+     * @return the response entity with the confirmation message
+     */
     @PostMapping("/{id}/confirm")
     public ResponseEntity<String> confirmPayment(@PathVariable String id) {
         try {
             paymentService.confirmPayment(id);
             return ResponseEntity.ok("Payment confirmed");
         } catch (Exception e) {
+            logger.error("Error confirming payment", e);
             return ResponseEntity.status(500).body(e.getMessage());
         }
     }
 
+    /**
+     * Cancels a payment.
+     *
+     * @param id the payment ID
+     * @return the response entity with the cancellation message
+     */
     @PostMapping("/{id}/cancel")
     public ResponseEntity<String> cancelPayment(@PathVariable String id) {
         try {
             paymentService.cancelPayment(id);
             return ResponseEntity.ok("Payment cancelled");
         } catch (Exception e) {
+            logger.error("Error cancelling payment", e);
             return ResponseEntity.status(500).body(e.getMessage());
         }
     }

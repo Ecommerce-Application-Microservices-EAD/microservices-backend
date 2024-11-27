@@ -8,64 +8,114 @@ import com.stripe.model.PaymentIntent;
 import com.stripe.param.PaymentIntentCreateParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Optional;
 
 @Service
 public class PaymentService {
 
+    private static final Logger logger = LoggerFactory.getLogger(PaymentService.class);
+    private static final String STATUS_PENDING = "pending";
+    private static final String STATUS_CONFIRMED = "confirmed";
+
     @Autowired
     private PaymentRepository paymentRepository;
 
+    /**
+     * Creates a payment.
+     *
+     * @param amount   the amount of the payment
+     * @param currency the currency of the payment
+     * @param userId   the user ID
+     * @return the payment ID and client secret
+     */
     public String createPayment(Long amount, String currency, String userId) {
-        System.out.println("createPayment: " + amount + ", " + currency + ", " + userId);
-        // Create a PaymentIntent with Stripe
+        logger.info("Creating payment: amount={}, currency={}, userId={}", amount, currency, userId);
+
+        if (amount <= 0 || currency == null || currency.isEmpty() || userId == null || userId.isEmpty()) {
+            throw new IllegalArgumentException("Invalid payment details");
+        }
+
         PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
                 .setAmount(amount)
                 .setCurrency(currency)
                 .build();
 
-        // System.out.println("params: " + params);
-
         try {
             PaymentIntent paymentIntent = PaymentIntent.create(params);
-            // System.out.println("paymentIntent: " + paymentIntent);
-
-            // Save payment details to MongoDB
-            Payment payment = new Payment(currency, amount, "pending", paymentIntent.getId(), userId);
+            Payment payment = new Payment(currency, amount, STATUS_PENDING, paymentIntent.getId(), userId);
             paymentRepository.save(payment);
 
             return payment.getId() + ", " + paymentIntent.getClientSecret();
-
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            logger.error("Error creating payment", e);
+            throw new RuntimeException("Payment creation failed", e);
         }
     }
 
+    /**
+     * Retrieves a payment by ID.
+     *
+     * @param paymentId the payment ID
+     * @return the payment
+     */
     public Payment getPayment(String paymentId) {
         return paymentRepository.findById(paymentId).orElse(null);
     }
 
+    /**
+     * Updates the status of a payment.
+     *
+     * @param paymentId the payment ID
+     * @param status    the new status
+     * @return the updated payment
+     */
     public Payment updatePaymentStatus(String paymentId, String status) {
-        Payment payment = paymentRepository.findById(paymentId).orElse(null);
-        if (payment != null) {
+        Optional<Payment> paymentOpt = paymentRepository.findById(paymentId);
+        if (paymentOpt.isPresent()) {
+            Payment payment = paymentOpt.get();
             payment.setStatus(status);
             paymentRepository.save(payment);
+            return payment;
         }
-        return payment;
+        return null;
     }
 
+    /**
+     * Confirms a payment.
+     *
+     * @param paymentId the payment ID
+     * @throws Exception if an error occurs
+     */
     public void confirmPayment(String paymentId) throws Exception {
-        System.out.println("confirmPayment: " + paymentId);
-        Payment payment = paymentRepository.findById(paymentId).orElse(null);
-        if (payment != null) {
-            /* PaymentIntent paymentIntent = PaymentIntent.retrieve(payment.getStripePaymentId());
-            paymentIntent.confirm(); */
-            payment.setStatus("confirmed");
+        logger.info("Confirming payment: paymentId={}", paymentId);
+        Optional<Payment> paymentOpt = paymentRepository.findById(paymentId);
+        if (paymentOpt.isPresent()) {
+            Payment payment = paymentOpt.get();
+            payment.setStatus(STATUS_CONFIRMED);
             paymentRepository.save(payment);
+        } else {
+            throw new Exception("Payment not found");
         }
     }
 
+    /**
+     * Cancels a payment.
+     *
+     * @param paymentId the payment ID
+     * @throws Exception if an error occurs
+     */
     public void cancelPayment(String paymentId) throws Exception {
-
+        logger.info("Cancelling payment: paymentId={}", paymentId);
+        Optional<Payment> paymentOpt = paymentRepository.findById(paymentId);
+        if (paymentOpt.isPresent()) {
+            Payment payment = paymentOpt.get();
+            payment.setStatus("cancelled");
+            paymentRepository.save(payment);
+        } else {
+            throw new Exception("Payment not found");
+        }
     }
 }

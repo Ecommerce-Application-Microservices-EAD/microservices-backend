@@ -5,25 +5,35 @@ import com.onlineshop.payment_service.model.Item;
 import com.onlineshop.payment_service.repository.CartRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CartService {
 
+    private static final Logger logger = LoggerFactory.getLogger(CartService.class);
+
     @Autowired
     private CartRepository cartRepository;
 
+    /**
+     * Adds an item to the cart.
+     *
+     * @param item the item to add
+     */
     public void addItem(Item item) {
-        String userId = item.getUserId(); //  the userId is part of the Item object
-        Cart cart = cartRepository.findByUserId(userId).orElse(null);
-
-        if (cart == null) {
-            cart = new Cart();
-            cart.setUserId(userId);
-            cart.setItems(new ArrayList<>());
-        }
+        String userId = item.getUserId(); // the userId is part of the Item object
+        Optional<Cart> cartOpt = cartRepository.findByUserId(userId);
+        Cart cart = cartOpt.orElseGet(() -> {
+            Cart newCart = new Cart();
+            newCart.setUserId(userId);
+            newCart.setItems(new ArrayList<>());
+            return newCart;
+        });
 
         // Check if item already exists in the cart
         boolean itemExists = cart.getItems().stream()
@@ -44,52 +54,57 @@ public class CartService {
         cartRepository.save(cart);
     }
 
+    /**
+     * Retrieves the cart by user ID.
+     *
+     * @param userId the user ID
+     * @return the cart
+     */
     public Cart getCartByUserId(String userId) {
         return cartRepository.findByUserId(userId).orElse(null);
     }
 
-
+    /**
+     * Clears the cart for a user.
+     *
+     * @param userId the user ID
+     * @return true if the cart was cleared, false otherwise
+     */
     public boolean clearCart(String userId) {
-        // Find the cart by userId
-        Cart cart = cartRepository.findByUserId(userId).orElse(null);
-    
-        if (cart != null) {
-            // Clear all items in the cart
+        Optional<Cart> cartOpt = cartRepository.findByUserId(userId);
+        if (cartOpt.isPresent()) {
+            Cart cart = cartOpt.get();
             cart.getItems().clear();
-            // Save the updated cart
             cartRepository.save(cart);
-            return true; 
+            return true;
         }
-    
-        return false; // Indicates no cart was found for the user
+        return false;
     }
-    
 
+    /**
+     * Removes an item from the cart.
+     *
+     * @param userId    the user ID
+     * @param productId the product ID
+     * @return a message indicating the result
+     */
     public String removeItemFromCart(String userId, String productId) {
-        System.out.println("userId: " + userId + " productId: " + productId);
-        Cart cart = cartRepository.findByUserId(userId).orElse(null);
-        System.out.println("Cart: " + cart);
-        if (cart != null) {
+        logger.info("Removing item from cart: userId={}, productId={}", userId, productId);
+        Optional<Cart> cartOpt = cartRepository.findByUserId(userId);
+        if (cartOpt.isPresent()) {
+            Cart cart = cartOpt.get();
             List<Item> items = cart.getItems();
-            for (int i = 0; i < items.size(); i++) {
-                if (items.get(i).getProductId().equals(productId)) {
-                    items.remove(i);
-                    cartRepository.save(cart);
-                    return "Item removed from cart successfully";
-                }
+            boolean itemRemoved = items.removeIf(item -> item.getProductId().equals(productId));
+            if (itemRemoved) {
+                cartRepository.save(cart);
+                return "Item removed from cart successfully";
+            } else {
+                logger.warn("Item not found in cart: productId={}", productId);
+                return "Item not found in cart";
             }
-
-            System.out.println("Item not found in cart");
-
-            return "Item not found in cart";
-
         } else {
-            System.out.println("Cart not found for user");
+            logger.warn("Cart not found for user: userId={}", userId);
             return "Cart not found for user";
         }
-
-
     }
-
-
 }

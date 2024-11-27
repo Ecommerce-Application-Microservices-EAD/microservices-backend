@@ -44,6 +44,7 @@ public class SecurityConfig {
         http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchanges -> exchanges
+                        .pathMatchers(HttpMethod.OPTIONS).permitAll()
                         .pathMatchers(AUTH_WHITELIST).permitAll()
                         .pathMatchers("/api/auth/**", "/api/user/**").permitAll()
                         .pathMatchers(HttpMethod.GET, "/api/v1/products", "/api/v1/products/{productId}", "/api/v1/products/categories", "/api/v1/products/search").permitAll()

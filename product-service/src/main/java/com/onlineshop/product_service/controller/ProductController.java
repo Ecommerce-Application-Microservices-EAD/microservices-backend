@@ -8,42 +8,82 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
+import org.springframework.http.MediaType;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+
+
+
 @RestController
-@RequestMapping("/api/v1/product")
+@RequestMapping("/api/v1/products")
 @RequiredArgsConstructor
 @Slf4j
 public class ProductController {
 
     private final ProductService productService;
+    private final ObjectMapper objectMapper;
 
-    @PostMapping
+    /**
+     * Create a new product
+     */
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public ProductResponse createProduct(@RequestBody ProductRequest productRequest) {
-        log.info("Creating product: {}", productRequest);
-        return productService.createProduct(productRequest);
+    public ProductResponse createProduct(
+            @RequestPart("product") String productJson,
+            @RequestPart("image") MultipartFile image) throws IOException {
+
+        log.info("Creating product: {}", productJson);
+
+        ProductRequest productRequest = objectMapper.readValue(productJson, ProductRequest.class);
+        byte[] imageData = image.getBytes();
+
+        return productService.createProduct(productRequest, imageData);
     }
 
+    /**
+     * Retrieve all products
+     */
     @GetMapping
     public List<ProductResponse> getAllProducts() {
+        log.info("Fetching all products");
         return productService.getAllProducts();
     }
 
+    /**
+     * Retrieve a product by its ID
+     */
     @GetMapping("/{productId}")
     public ProductResponse getProductById(@PathVariable String productId) {
         log.info("Fetching product with ID: {}", productId);
         return productService.getProductById(productId);
     }
 
-    @PutMapping("/{productId}")
+    /**
+     * Update an existing product
+     */
+    @PutMapping(value = "/{productId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public ProductResponse updateProductById(@PathVariable String productId, @RequestBody ProductRequest productRequest) {
+    public ProductResponse updateProductById(
+            @PathVariable String productId,
+            @RequestPart("product") String productJson,
+            @RequestPart(value = "image", required = false) MultipartFile image) throws IOException {
+
         log.info("Updating product with ID: {}", productId);
-        return productService.updateProduct(productId, productRequest);
+
+        ProductRequest productRequest = objectMapper.readValue(productJson, ProductRequest.class);
+        byte[] imageData = (image != null) ? image.getBytes() : null;
+
+        return productService.updateProduct(productId, productRequest, imageData);
     }
 
+    /**
+     * Delete a product by its ID
+     */
     @DeleteMapping("/{productId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteProductById(@PathVariable String productId) {

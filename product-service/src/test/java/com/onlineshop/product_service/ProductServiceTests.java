@@ -36,44 +36,82 @@ class ProductServiceTests {
 
     @Test
     void shouldCreateProduct() {
-        ProductRequest productRequest = new ProductRequest("iphone 16", "new iphone", new BigDecimal("999"),
-                "Electronics");
-        Product savedProduct = new Product("1", "iphone 16", "new iphone", new BigDecimal("999"), "Electronics");
+        ProductRequest productRequest = new ProductRequest("iPhone 16", "New iPhone", new BigDecimal("999"), 50, "Electronics", new byte[]{1, 2, 3});
+        Product savedProduct = Product.builder()
+                .id("1")
+                .name("iPhone 16")
+                .description("New iPhone")
+                .price(new BigDecimal("999"))
+                .stock(50)
+                .category("Electronics")
+                .imageData(new byte[]{1, 2, 3})
+                .build();
 
         when(productRepository.save(any(Product.class))).thenReturn(savedProduct);
 
-        ProductResponse response = productService.createProduct(productRequest);
+        ProductResponse response = productService.createProduct(productRequest, productRequest.imageData());
 
         assertNotNull(response);
-        assertEquals("iphone 16", response.name());
-        assertEquals("new iphone", response.description());
-        assertEquals(BigDecimal.valueOf(999), response.price());
+        assertEquals("iPhone 16", response.name());
+        assertEquals("New iPhone", response.description());
+        assertEquals(new BigDecimal("999"), response.price());
+        assertEquals(50, response.stock());
+        assertEquals("Electronics", response.category());
+        assertArrayEquals(new byte[]{1, 2, 3}, response.imageData());
         verify(productRepository, times(1)).save(any(Product.class));
     }
 
     @Test
     void shouldGetAllProducts() {
-        Product product1 = new Product("1", "iphone 16", "new iphone", new BigDecimal("999"), "Electronics");
-        Product product2 = new Product("2", "galaxy s20", "new galaxy", new BigDecimal("899"), "Electronics");
+        Product product1 = Product.builder()
+                .id("1")
+                .name("iPhone 16")
+                .description("New iPhone")
+                .price(new BigDecimal("999"))
+                .stock(50)
+                .category("Electronics")
+                .imageData(new byte[]{1, 2, 3})
+                .build();
+
+        Product product2 = Product.builder()
+                .id("2")
+                .name("Galaxy S20")
+                .description("New Galaxy")
+                .price(new BigDecimal("899"))
+                .stock(40)
+                .category("Electronics")
+                .imageData(new byte[]{4, 5, 6})
+                .build();
 
         when(productRepository.findAll()).thenReturn(Arrays.asList(product1, product2));
 
         List<ProductResponse> response = productService.getAllProducts();
 
         assertEquals(2, response.size());
-        assertEquals("iphone 16", response.get(0).name());
-        assertEquals("galaxy s20", response.get(1).name());
+        assertEquals("iPhone 16", response.get(0).name());
+        assertEquals("Galaxy S20", response.get(1).name());
     }
 
     @Test
     void shouldGetProductById() {
-        Product product = new Product("1", "iphone 16", "new iphone", new BigDecimal("999"), "Electronics");
+        Product product = Product.builder()
+                .id("1")
+                .name("iPhone 16")
+                .description("New iPhone")
+                .price(new BigDecimal("999"))
+                .stock(50)
+                .category("Electronics")
+                .imageData(new byte[]{1, 2, 3})
+                .build();
+
         when(productRepository.findById("1")).thenReturn(Optional.of(product));
 
         ProductResponse response = productService.getProductById("1");
 
         assertNotNull(response);
-        assertEquals("iphone 16", response.name());
+        assertEquals("iPhone 16", response.name());
+        assertEquals("Electronics", response.category());
+        assertArrayEquals(new byte[]{1, 2, 3}, response.imageData());
     }
 
     @Test
@@ -85,34 +123,59 @@ class ProductServiceTests {
 
     @Test
     void shouldUpdateProduct() {
-        Product existingProduct = new Product("1", "iphone 16", "new iphone", new BigDecimal("999"), "Electronics");
-        ProductRequest updateRequest = new ProductRequest("iphone 16", "updated iphone", new BigDecimal("1099"),
-                "Electronics");
-        Product updatedProduct = new Product("1", "iphone 16", "updated iphone", new BigDecimal("1099"), "Electronics");
+        Product existingProduct = Product.builder()
+                .id("1")
+                .name("iPhone 16")
+                .description("New iPhone")
+                .price(new BigDecimal("999"))
+                .stock(50)
+                .category("Electronics")
+                .imageData(new byte[]{1, 2, 3})
+                .build();
+
+        ProductRequest updateRequest = new ProductRequest("iPhone 16", "Updated iPhone", new BigDecimal("1099"), 30, "Electronics", new byte[]{4, 5, 6});
+        Product updatedProduct = Product.builder()
+                .id("1")
+                .name("iPhone 16")
+                .description("Updated iPhone")
+                .price(new BigDecimal("1099"))
+                .stock(30)
+                .category("Electronics")
+                .imageData(new byte[]{4, 5, 6})
+                .build();
 
         when(productRepository.findById("1")).thenReturn(Optional.of(existingProduct));
         when(productRepository.save(any(Product.class))).thenReturn(updatedProduct);
 
-        ProductResponse response = productService.updateProduct("1", updateRequest);
+        ProductResponse response = productService.updateProduct("1", updateRequest, updateRequest.imageData());
 
         assertNotNull(response);
-        assertEquals("updated iphone", response.description());
-        assertEquals(BigDecimal.valueOf(1099), response.price());
+        assertEquals("Updated iPhone", response.description());
+        assertEquals(new BigDecimal("1099"), response.price());
+        assertEquals(30, response.stock());
+        assertArrayEquals(new byte[]{4, 5, 6}, response.imageData());
     }
 
     @Test
     void shouldThrowExceptionWhenUpdatingNonexistentProduct() {
-        ProductRequest updateRequest = new ProductRequest("iphone 16", "updated iphone", new BigDecimal("1099"),
-                "Electronics");
+        ProductRequest updateRequest = new ProductRequest("iPhone 16", "Updated iPhone", new BigDecimal("1099"), 30, "Electronics", new byte[]{4, 5, 6});
 
         when(productRepository.findById("1")).thenReturn(Optional.empty());
 
-        assertThrows(ProductNotFoundException.class, () -> productService.updateProduct("1", updateRequest));
+        assertThrows(ProductNotFoundException.class, () -> productService.updateProduct("1", updateRequest, updateRequest.imageData()));
     }
 
     @Test
     void shouldDeleteProductById() {
-        Product product = new Product("1", "iphone 16", "new iphone", new BigDecimal("999"), "Electronics");
+        Product product = Product.builder()
+                .id("1")
+                .name("iPhone 16")
+                .description("New iPhone")
+                .price(new BigDecimal("999"))
+                .stock(50)
+                .category("Electronics")
+                .imageData(new byte[]{1, 2, 3})
+                .build();
 
         when(productRepository.findById("1")).thenReturn(Optional.of(product));
         doNothing().when(productRepository).delete(product);
@@ -129,21 +192,6 @@ class ProductServiceTests {
         assertThrows(ProductNotFoundException.class, () -> productService.deleteProduct("1"));
     }
 
-    @Test
-    void shouldCreateProductWithCategory() {
-        ProductRequest productRequest = new ProductRequest("iphone 16", "new iphone", new BigDecimal("999"),
-                "Electronics");
-        Product savedProduct = new Product("1", "iphone 16", "new iphone", new BigDecimal("999"), "Electronics");
-
-        when(productRepository.save(any(Product.class))).thenReturn(savedProduct);
-
-        ProductResponse response = productService.createProduct(productRequest);
-
-        assertNotNull(response);
-        assertEquals("iphone 16", response.name());
-        assertEquals("Electronics", response.category());
-        verify(productRepository, times(1)).save(any(Product.class));
-    }
 
     @Test
     void shouldGetAllCategories() {
@@ -171,9 +219,9 @@ class ProductServiceTests {
     @Test
     void shouldSearchProductsByKeyword() {
         String keyword = "iphone";
-        Product product1 = new Product("1", "iPhone 16", "Latest iPhone model", new BigDecimal("999"), "Electronics");
-        Product product2 = new Product("2", "iPhone Case", "Protective case for iPhone", new BigDecimal("49"),
-                "Accessories");
+        Product product1 = new Product("1", "iPhone 16", "Latest iPhone model", new BigDecimal("999"),50, "Electronics",null);
+        Product product2 = new Product("2", "iPhone Case", "Protective case for iPhone", new BigDecimal("49"),50,
+                "Accessories",null);
 
         when(productRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword, keyword))
                 .thenReturn(Arrays.asList(product1, product2));

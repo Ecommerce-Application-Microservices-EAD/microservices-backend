@@ -44,12 +44,13 @@ public class SecurityConfig {
         http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchanges -> exchanges
+                        .pathMatchers(HttpMethod.OPTIONS).permitAll()
                         .pathMatchers(AUTH_WHITELIST).permitAll()
                         .pathMatchers("/api/auth/**", "/api/user/**").permitAll()
-                        .pathMatchers(HttpMethod.GET, "/api/v1/product", "/api/v1/product/{productId}", "/api/v1/product/categories", "/api/v1/product/search").permitAll()
-                        .pathMatchers(HttpMethod.POST, "/api/v1/product").hasRole("ADMIN")
-                        .pathMatchers(HttpMethod.PUT, "/api/v1/product/{productId}").hasRole("ADMIN")
-                        .pathMatchers(HttpMethod.DELETE, "/api/v1/product/{productId}").hasRole("ADMIN")
+                        .pathMatchers(HttpMethod.GET, "/api/v1/products", "/api/v1/products/{productId}", "/api/v1/products/categories", "/api/v1/products/search").permitAll()
+                        .pathMatchers(HttpMethod.POST, "/api/v1/products").hasRole("ADMIN")
+                        .pathMatchers(HttpMethod.PUT, "/api/v1/products/{productId}").hasRole("ADMIN")
+                        .pathMatchers(HttpMethod.DELETE, "/api/v1/products/{productId}").hasRole("ADMIN")
                         .pathMatchers("/api/inventory/**").hasAnyRole("ADMIN")
                         .pathMatchers("/api/order/**").hasAnyRole("USER")
                         .anyExchange().authenticated()

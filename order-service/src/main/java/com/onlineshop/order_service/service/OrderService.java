@@ -29,6 +29,7 @@ public class OrderService {
                     .skuCode(orderRequest.skuCode())
                     .price(orderRequest.price())
                     .quantity(orderRequest.quantity())
+                    .userId(orderRequest.userId())
                     .build();
             orderRepository.save(order);
             log.info("Order placed successfully");
@@ -38,6 +39,7 @@ public class OrderService {
                     .skuCode(order.getSkuCode())
                     .price(order.getPrice())
                     .quantity(order.getQuantity())
+                    .userId(order.getUserId())
                     .build();
         }
         log.info("Order failed due to product not in stock");
@@ -68,7 +70,6 @@ throw new RuntimeException("Product "+orderRequest.skuCode()+" not in stock");
                 .skuCode(order.getSkuCode())
                 .price(order.getPrice())
                 .quantity(order.getQuantity())
-                .userId(order.getUserId())
                 .build();
     }
 

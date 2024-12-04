@@ -1,16 +1,17 @@
 package com.onlineshop.payment_service.service;
 
-import com.onlineshop.payment_service.model.Cart;
-import com.onlineshop.payment_service.model.Item;
-import com.onlineshop.payment_service.repository.CartRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.onlineshop.payment_service.model.Cart;
+import com.onlineshop.payment_service.model.Item;
+import com.onlineshop.payment_service.repository.CartRepository;
 
 @Service
 public class CartService {
@@ -61,7 +62,12 @@ public class CartService {
      * @return the cart
      */
     public Cart getCartByUserId(String userId) {
-        return cartRepository.findByUserId(userId).orElse(null);
+        return cartRepository.findByUserId(userId).orElseGet(() -> {
+            Cart cart = new Cart();
+            cart.setUserId(userId);
+            cart.setItems(new ArrayList<>());
+            return cart;
+        });
     }
 
     /**

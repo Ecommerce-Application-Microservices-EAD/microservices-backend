@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.onlineshop.payment_service.exception.InvalidRequestException;
+import com.onlineshop.payment_service.exception.ResourceNotFoundException;
 import com.onlineshop.payment_service.model.Cart;
 import com.onlineshop.payment_service.model.Item;
 import com.onlineshop.payment_service.repository.CartRepository;
@@ -56,17 +58,18 @@ public class CartService {
     }
 
     /**
-     * Retrieves the cart by user ID.
+     * Retrieves the cart by user ID. Creates a new cart if it does not exist.
      *
      * @param userId the user ID
      * @return the cart
      */
     public Cart getCartByUserId(String userId) {
         return cartRepository.findByUserId(userId).orElseGet(() -> {
-            Cart cart = new Cart();
-            cart.setUserId(userId);
-            cart.setItems(new ArrayList<>());
-            return cart;
+            Cart newCart = new Cart();
+            newCart.setUserId(userId);
+            newCart.setItems(new ArrayList<>());
+            cartRepository.save(newCart);
+            return newCart;
         });
     }
 
@@ -83,8 +86,9 @@ public class CartService {
             cart.getItems().clear();
             cartRepository.save(cart);
             return true;
+        } else {
+            throw new ResourceNotFoundException("Cart not found for user: " + userId);
         }
-        return false;
     }
 
     /**
@@ -105,12 +109,10 @@ public class CartService {
                 cartRepository.save(cart);
                 return "Item removed from cart successfully";
             } else {
-                logger.warn("Item not found in cart: productId={}", productId);
-                return "Item not found in cart";
+                throw new InvalidRequestException("Item not found in cart: " + productId);
             }
         } else {
-            logger.warn("Cart not found for user: userId={}", userId);
-            return "Cart not found for user";
+            throw new ResourceNotFoundException("Cart not found for user: " + userId);
         }
     }
 }

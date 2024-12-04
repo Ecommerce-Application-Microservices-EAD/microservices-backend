@@ -22,8 +22,6 @@ public class GlobalExceptionHandler {
         return createErrorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
-
-    // Generic Exception Handler for any other exceptions
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneralException(Exception ex) {
         return createErrorResponse("An unexpected error occurred", HttpStatus.INTERNAL_SERVER_ERROR);

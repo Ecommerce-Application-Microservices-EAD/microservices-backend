@@ -4,7 +4,7 @@ import lombok.Builder;
 
 import java.math.BigDecimal;
 
-public record OrderResponse(Long id, String orderNumber, String skuCode, BigDecimal price, Integer quantity){
+public record OrderResponse(Long id, String orderNumber, String skuCode, BigDecimal price, Integer quantity, String userId){
 
     @Builder
     public OrderResponse {

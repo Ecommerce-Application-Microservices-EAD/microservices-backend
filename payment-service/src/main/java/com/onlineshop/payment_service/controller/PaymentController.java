@@ -12,8 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @RestController
-@RequestMapping("/api/payments")
-@CrossOrigin(origins = "http://localhost:3000")
+@RequestMapping("/api/v1/payments")
+// @CrossOrigin(origins = "http://localhost:3000")
 public class PaymentController {
 
     private static final Logger logger = LoggerFactory.getLogger(PaymentController.class);

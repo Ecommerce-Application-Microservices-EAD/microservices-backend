@@ -26,12 +26,18 @@ public class CartController {
      * @param item the item to add
      * @return the response entity with a success message
      */
-    @PostMapping("/add")
-    public ResponseEntity<String> addToCart(@RequestBody Item item) {
-        logger.info("Adding item to cart: {}", item);
-        cartService.addItem(item);
+    @PostMapping("/{userId}")
+    public ResponseEntity<String> addToCart(@PathVariable String userId, @RequestBody Item item) {
+        logger.info("Adding item to cart for user {}: {}", userId, item);
+        cartService.addItem(userId, item);
         return ResponseEntity.ok("Item added to cart successfully");
     }
+    // @PostMapping("/add")
+    // public ResponseEntity<String> addToCart(@RequestBody Item item) {
+    // logger.info("Adding item to cart: {}", item);
+    // cartService.addItem(item);
+    // return ResponseEntity.ok("Item added to cart successfully");
+    // }
 
     /**
      * Retrieves the cart by user ID.
@@ -41,6 +47,7 @@ public class CartController {
      */
     @GetMapping("/{userId}")
     public ResponseEntity<Cart> getCartByUserId(@PathVariable String userId) {
+        logger.info("Retrieving cart for user: {}", userId);
         Cart cart = cartService.getCartByUserId(userId);
         if (cart != null) {
             return ResponseEntity.ok(cart);
@@ -55,8 +62,9 @@ public class CartController {
      * @param userId the user ID
      * @return the response entity with a success or error message
      */
-    @DeleteMapping("/clear")
-    public ResponseEntity<String> clearCart(@RequestParam String userId) {
+
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<String> clearCart(@PathVariable String userId) {
         boolean cleared = cartService.clearCart(userId);
         if (cleared) {
             return ResponseEntity.ok("Cart cleared successfully");
@@ -65,6 +73,16 @@ public class CartController {
         }
     }
 
+    // @DeleteMapping("/clear")
+    // public ResponseEntity<String> clearCart(@RequestParam String userId) {
+    // boolean cleared = cartService.clearCart(userId);
+    // if (cleared) {
+    // return ResponseEntity.ok("Cart cleared successfully");
+    // } else {
+    // return ResponseEntity.status(404).body("Cart not found for user");
+    // }
+    // }
+
     /**
      * Removes an item from the cart.
      *
@@ -72,9 +90,27 @@ public class CartController {
      * @param userId    the user ID
      * @return the response entity with a success or error message
      */
-    @DeleteMapping("/remove/{productId}")
-    public ResponseEntity<String> removeFromCart(@PathVariable String productId, @RequestParam String userId) {
-        logger.info("Removing item from cart: productId={}, userId={}", productId, userId);
+
+    // @DeleteMapping("/remove/{productId}")
+    // public ResponseEntity<String> removeFromCart(@PathVariable String productId,
+    // @RequestParam String userId) {
+    // logger.info("Removing item from cart: productId={}, userId={}", productId,
+    // userId);
+    // String res = cartService.removeItemFromCart(userId, productId);
+
+    // switch (res) {
+    // case "Item removed from cart successfully":
+    // return ResponseEntity.ok("Item removed from cart successfully");
+    // case "Item not found in cart":
+    // return ResponseEntity.status(404).body("Item not found in cart");
+    // default:
+    // return ResponseEntity.status(404).body("Cart not found for user");
+    // }
+    // }
+
+    @DeleteMapping("/{userId}/{productId}")
+    public ResponseEntity<String> removeFromCart(@PathVariable String userId, @PathVariable String productId) {
+        logger.info("Removing item from cart: userId={}, productId={}", userId, productId);
         String res = cartService.removeItemFromCart(userId, productId);
 
         switch (res) {

@@ -23,10 +23,10 @@ public class CartService {
     /**
      * Adds an item to the cart.
      *
-     * @param item the item to add
+     * @param userId the ID of the user
+     * @param item   the item to add
      */
-    public void addItem(Item item) {
-        String userId = item.getUserId(); // the userId is part of the Item object
+    public void addItem(String userId, Item item) {
         Optional<Cart> cartOpt = cartRepository.findByUserId(userId);
         Cart cart = cartOpt.orElseGet(() -> {
             Cart newCart = new Cart();

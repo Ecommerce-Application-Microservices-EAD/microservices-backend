@@ -2,16 +2,18 @@
 
 package com.onlineshop.payment_service.service;
 
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.onlineshop.payment_service.exception.ResourceNotFoundException;
 import com.onlineshop.payment_service.model.Payment;
 import com.onlineshop.payment_service.repository.PaymentRepository;
 import com.stripe.model.PaymentIntent;
 import com.stripe.param.PaymentIntentCreateParams;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Optional;
 
 @Service
 public class PaymentService {
@@ -62,7 +64,8 @@ public class PaymentService {
      * @return the payment
      */
     public Payment getPayment(String paymentId) {
-        return paymentRepository.findById(paymentId).orElse(null);
+        return paymentRepository.findById(paymentId).orElseThrow(() -> 
+            new ResourceNotFoundException("Payment not found: " + paymentId));
     }
 
     /**
@@ -79,8 +82,9 @@ public class PaymentService {
             payment.setStatus(status);
             paymentRepository.save(payment);
             return payment;
+        } else {
+            throw new ResourceNotFoundException("Payment not found: " + paymentId);
         }
-        return null;
     }
 
     /**
@@ -97,7 +101,7 @@ public class PaymentService {
             payment.setStatus(STATUS_CONFIRMED);
             paymentRepository.save(payment);
         } else {
-            throw new Exception("Payment not found");
+            throw new ResourceNotFoundException("Payment not found: " + paymentId);
         }
     }
 
@@ -115,7 +119,7 @@ public class PaymentService {
             payment.setStatus("cancelled");
             paymentRepository.save(payment);
         } else {
-            throw new Exception("Payment not found");
+            throw new ResourceNotFoundException("Payment not found: " + paymentId);
         }
     }
 }

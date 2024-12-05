@@ -18,8 +18,8 @@ public class Routes {
                 RouteLocator routeLocator = builder.routes()
                                 .route("product-service", r -> r.path("/api/v1/products/**")
                                                 .uri("http://localhost:8080"))
-                                .route("order-service", r -> r.path("/api/v1/orders/**")
-                                                .uri("http://localhost:8081"))
+                                // .route("order-service", r -> r.path("/api/v1/orders/**")
+                                //                 .uri("http://localhost:8081"))
                                 .route("inventory-service", r -> r.path("/api/inventory/**")
                                                 .uri("http://localhost:8082"))
                                 .route("user-service", r -> r.path("/api/user/**")
@@ -27,9 +27,12 @@ public class Routes {
                                 .route("auth-service", r -> r.path("/api/auth/**")
                                                 .uri("http://localhost:8084"))
 
+                                                
                                 .route("payment-service", r -> r.path("/api/v1/payments/**")
                                 .uri("http://localhost:8085"))
                                 .route("payment-service", r -> r.path("/api/v1/cart/**")
+                                .uri("http://localhost:8085"))
+                                .route("payment-service", r -> r.path("/api/v1/orders/**")
                                 .uri("http://localhost:8085"))
                                 
                                 // .route("payment-service", r -> r

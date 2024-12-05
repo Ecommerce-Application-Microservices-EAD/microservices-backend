@@ -28,9 +28,6 @@ public class ProductController {
     private final ProductService productService;
     private final ObjectMapper objectMapper;
 
-    /**
-     * Create a new product
-     */
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public ProductResponse createProduct(
@@ -45,27 +42,18 @@ public class ProductController {
         return productService.createProduct(productRequest, imageData);
     }
 
-    /**
-     * Retrieve all products
-     */
     @GetMapping
     public List<ProductResponse> getAllProducts() {
         log.info("Fetching all products");
         return productService.getAllProducts();
     }
 
-    /**
-     * Retrieve a product by its ID
-     */
     @GetMapping("/{productId}")
     public ProductResponse getProductById(@PathVariable String productId) {
         log.info("Fetching product with ID: {}", productId);
         return productService.getProductById(productId);
     }
 
-    /**
-     * Update an existing product
-     */
     @PutMapping(value = "/{productId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public ProductResponse updateProductById(
@@ -81,9 +69,6 @@ public class ProductController {
         return productService.updateProduct(productId, productRequest, imageData);
     }
 
-    /**
-     * Delete a product by its ID
-     */
     @DeleteMapping("/{productId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteProductById(@PathVariable String productId) {
@@ -91,7 +76,6 @@ public class ProductController {
         productService.deleteProduct(productId);
     }
 
-    
     @Operation(summary = "Fetch all product categories")
     @GetMapping("/categories")
     @ResponseStatus(HttpStatus.OK)
@@ -106,5 +90,14 @@ public class ProductController {
     public List<ProductResponse> searchProducts(@RequestParam String keyword) {
         log.info("Searching for products with keyword: {}", keyword);
         return productService.searchProducts(keyword);
+    }
+
+    @PatchMapping("/{productId}/reduce-quantity")
+    @ResponseStatus(HttpStatus.OK)
+    public ProductResponse reduceProductQuantity(
+            @PathVariable String productId,
+            @RequestParam int count) {
+        log.info("Reducing quantity of product with ID: {} by count: {}", productId, count);
+        return productService.reduceProductQuantity(productId, count);
     }
 }

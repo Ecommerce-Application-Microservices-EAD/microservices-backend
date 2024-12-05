@@ -104,4 +104,18 @@ public class ProductService {
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
+
+    public ProductResponse reduceProductQuantity(String id, int count) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ProductNotFoundException(id));
+
+        if (product.getStock() < count) {
+            throw new IllegalArgumentException("Not enough stock to reduce by the specified count");
+        }
+
+        product.setStock(product.getStock() - count);
+        Product updatedProduct = productRepository.save(product);
+        log.info("Reduced quantity of product: {} by count: {}", updatedProduct, count);
+        return mapToResponse(updatedProduct);
+    }
 }

@@ -50,7 +50,11 @@ public class OrderController {
     public ResponseEntity<List<Order>> getAllOrders() {
         logger.info("Fetching all orders");
         try {
-            return ResponseEntity.ok(orderService.getAllOrders());
+            List<Order> orders = orderService.getAllOrders();
+            return ResponseEntity.ok(orders);
+        } catch (IllegalArgumentException e) {
+            logger.error("Error fetching all orders: {}", e.getMessage());
+            return ResponseEntity.badRequest().build();
         } catch (Exception e) {
             logger.error("Unexpected error fetching all orders", e);
             return ResponseEntity.internalServerError().build();

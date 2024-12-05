@@ -39,7 +39,18 @@ public class OrderService {
 
     public List<Order> getAllOrders() {
         logger.info("Fetching all orders from repository");
-        return orderRepository.findAll();
+        try {
+            List<Order> orders = orderRepository.findAll();
+            if (orders == null || orders.isEmpty()) {
+                logger.warn("No orders found in the repository");
+            }
+            logger.info("Found {} orders in the repository", orders.size());
+            logger.debug("Orders: {}", orders);
+            return orders;
+        } catch (Exception e) {
+            logger.error("Error fetching all orders from repository", e);
+            throw e;
+        }
     }
 
     public List<Order> getOrdersByUserId(String userId) {

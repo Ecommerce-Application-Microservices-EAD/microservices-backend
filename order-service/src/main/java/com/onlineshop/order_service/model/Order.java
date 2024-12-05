@@ -4,6 +4,11 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.sql.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import com.netflix.discovery.converters.Converters.DataCenterInfoConverter;
 
 @Entity
 @Getter
@@ -12,6 +17,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @Table(name = "t_orders")
 @Builder
+
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,5 +27,8 @@ public class Order {
     private String skuCode;
     private BigDecimal price;
     private Integer quantity;
+    private String status;
+    //private Date updatedAt;
+
 
 }

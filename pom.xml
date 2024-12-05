@@ -26,6 +26,7 @@
         <module>user-service</module>
         <module>auth-service</module>
         <module>service-discovery</module>
+        <module>payment-service</module>
         <!-- Add other modules if needed -->
     </modules>
 

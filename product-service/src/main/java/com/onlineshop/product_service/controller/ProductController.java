@@ -91,4 +91,13 @@ public class ProductController {
         log.info("Searching for products with keyword: {}", keyword);
         return productService.searchProducts(keyword);
     }
+
+    @PatchMapping("/{productId}/reduce-quantity")
+    @ResponseStatus(HttpStatus.OK)
+    public ProductResponse reduceProductQuantity(
+            @PathVariable String productId,
+            @RequestParam int count) {
+        log.info("Reducing quantity of product with ID: {} by count: {}", productId, count);
+        return productService.reduceProductQuantity(productId, count);
+    }
 }

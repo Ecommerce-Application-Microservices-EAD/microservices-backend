@@ -51,6 +51,7 @@ public class SecurityConfig {
                         .pathMatchers(HttpMethod.POST, "/api/v1/products").hasRole("ADMIN")
                         .pathMatchers(HttpMethod.PUT, "/api/v1/products/{productId}").hasRole("ADMIN")
                         .pathMatchers(HttpMethod.DELETE, "/api/v1/products/{productId}").hasRole("ADMIN")
+                        .pathMatchers(HttpMethod.PATCH, "/api/v1/products/{productId}/reduce-quantity").permitAll()
                         .pathMatchers("/api/inventory/**").hasAnyRole("ADMIN")
                         .pathMatchers("/api/order/**").hasAnyRole("USER")
                         .anyExchange().authenticated()

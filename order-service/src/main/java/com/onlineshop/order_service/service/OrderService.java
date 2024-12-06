@@ -10,10 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -23,32 +20,43 @@ public class OrderService {
         private final OrderRepository orderRepository;
         private final InventoryClient inventoryClient;
 
-        public OrderResponse placeOrder(OrderRequest orderRequest) {
-                // var isProductInStock = inventoryClient.isInStock(orderRequest.skuCode(),
-                // orderRequest.quantity());
-                if ( /* isProductInStock */ true) {
-                        Order order = Order.builder()
+        public List<OrderResponse> placeOrder(List<OrderRequest> orderRequests) {
+                List<OrderResponse> responses = new ArrayList<>();
+
+
+                for (OrderRequest orderRequest : orderRequests) {
+                        boolean isProductInStock = inventoryClient.isInStock(orderRequest.skuCode(), orderRequest.quantity());
+
+                        if (isProductInStock) {
+                                Order order = Order.builder()
                                         .orderNumber(UUID.randomUUID().toString())
                                         .skuCode(orderRequest.skuCode())
                                         .price(orderRequest.price())
                                         .quantity(orderRequest.quantity())
                                         .userId(orderRequest.userId())
-                                        .status(orderRequest.status())
+                                        .status("Ordered")
                                         .build();
-                        orderRepository.save(order);
-                        log.info("Order placed successfully");
-                        return OrderResponse.builder()
+                                orderRepository.save(order);
+
+                                OrderResponse response = OrderResponse.builder()
                                         .id(order.getId())
                                         .orderNumber(order.getOrderNumber())
                                         .skuCode(order.getSkuCode())
                                         .price(order.getPrice())
                                         .quantity(order.getQuantity())
-                                        .userId(orderRequest.userId())
-                                        .status(orderRequest.status())
+                                        .userId(order.getUserId())
+                                        .status("Ordered")
                                         .build();
+
+                                responses.add(response);
+                        } else {
+                                log.info("Order failed for SKU: {} due to product not being in stock", orderRequest.skuCode());
+                                throw new RuntimeException("Product " + orderRequest.skuCode() + " not in stock");
+                        }
                 }
-                log.info("Order failed due to product not in stock");
-                throw new RuntimeException("Product " + orderRequest.skuCode() + " not in stock");
+
+                log.info("All orders processed successfully");
+                return responses;
         }
 
         public List<OrderResponse> getOrders() {
@@ -63,6 +71,8 @@ public class OrderService {
                                                 .skuCode(order.getSkuCode())
                                                 .price(order.getPrice())
                                                 .quantity(order.getQuantity())
+                                                .status(order.getStatus())
+                                                .userId(order.getUserId())
                                                 .build())
                                 .toList();
         }
@@ -78,6 +88,7 @@ public class OrderService {
                                 .price(order.getPrice())
                                 .quantity(order.getQuantity())
                                 .userId(order.getUserId())
+                                .status(order.getStatus())
                                 .build();
         }
 
@@ -118,4 +129,6 @@ public class OrderService {
                 log.info("Modifying status for orderId: {}", orderId);
                 return updateOrderStatus(orderId, status);
         }
+
+
 }

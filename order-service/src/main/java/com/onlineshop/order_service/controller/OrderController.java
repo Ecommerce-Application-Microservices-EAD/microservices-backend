@@ -17,10 +17,15 @@ public class OrderController {
 
     private final OrderService orderService;
 
+//    @PostMapping
+//    @ResponseStatus(HttpStatus.CREATED)
+//    public OrderResponse placeOrder(@RequestBody OrderRequest orderRequest) {
+//        return orderService.placeOrder(orderRequest);
+//    }
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public OrderResponse placeOrder(@RequestBody OrderRequest orderRequest) {
-        return orderService.placeOrder(orderRequest);
+    public List<OrderResponse> placeOrders(@RequestBody List<OrderRequest> orderRequests) {
+        return orderService.placeOrder(orderRequests);
     }
 
     @GetMapping

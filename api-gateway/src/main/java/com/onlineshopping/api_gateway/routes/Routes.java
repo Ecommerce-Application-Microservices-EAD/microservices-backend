@@ -11,28 +11,28 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class Routes {
 
-        @Bean
-        public RouteLocator gatewayRoutes(RouteLocatorBuilder builder) {
-                log.info("Configuring gateway routes...");
+    @Bean
+    public RouteLocator gatewayRoutes(RouteLocatorBuilder builder) {
+        log.info("Configuring gateway routes...");
 
-                RouteLocator routeLocator = builder.routes()
-                        .route("product-service", r -> r.path("/api/v1/products/**")
-                                .uri("http://localhost:8080"))
-                        .route("inventory-service", r -> r.path("/api/inventory/**")
-                                .uri("http://localhost:8082"))
-                        .route("user-service", r -> r.path("/api/user/**")
-                                .uri("http://localhost:8083"))
-                        .route("auth-service", r -> r.path("/api/auth/**")
-                                .uri("http://localhost:8084"))
-                        .route("payment-service-payments", r -> r.path("/api/v1/payments/**")
-                                .uri("http://localhost:8085"))
-                        .route("payment-service-cart", r -> r.path("/api/v1/cart/**")
-                                .uri("http://localhost:8085"))
-                        .route("payment-service-orders", r -> r.path("/api/v1/orders/**")
-                                .uri("http://localhost:8085"))
-                        .build();
+        RouteLocator routeLocator = builder.routes()
+                .route("product-service", r -> r.path("/api/v1/products/**")
+                        .uri("http://product-service:8080")) // Changed to service name
+                .route("inventory-service", r -> r.path("/api/inventory/**")
+                        .uri("http://inventory-service:8082")) // Update if you have an inventory service
+                .route("user-service", r -> r.path("/api/user/**")
+                        .uri("http://user-service:8083")) // Changed to service name
+                .route("auth-service", r -> r.path("/api/auth/**")
+                        .uri("http://auth-service:8084")) // Changed to service name
+                .route("payment-service-payments", r -> r.path("/api/v1/payments/**")
+                        .uri("http://payment-service:8085")) // Changed to service name
+                .route("payment-service-cart", r -> r.path("/api/v1/cart/**")
+                        .uri("http://payment-service:8085")) // Changed to service name
+                .route("payment-service-orders", r -> r.path("/api/v1/orders/**")
+                        .uri("http://payment-service:8085")) // Changed to service name
+                .build();
 
-                log.info("Gateway routes configured successfully.");
-                return routeLocator;
-        }
+        log.info("Gateway routes configured successfully.");
+        return routeLocator;
+    }
 }

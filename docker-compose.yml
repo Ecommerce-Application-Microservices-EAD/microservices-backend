@@ -12,62 +12,62 @@ services:
     volumes:
       - ./data/mongodb:/data/db
 
-#  product-service:
-#    build:
-#      context: ./product-service
-#      dockerfile: Dockerfile
-#    image: madhuraonline/ead-product-service
-#    container_name: onlineshop-product-service
-#    ports:
-#      - "8080:8080"
-#    depends_on:
-#      - mongodb
-#
-#  auth-service:
-#    build:
-#      context: ./auth-service
-#      dockerfile: Dockerfile
-#    image: madhuraonline/ead-auth-service
-#    container_name: onlineshop-auth-service
-#    ports:
-#      - "8084:8084"
-#    depends_on:
-#      - user-service
-#
-#  user-service:
-#    build:
-#      context: ./user-service
-#      dockerfile: Dockerfile
-#    image: madhuraonline/ead-user-service
-#    container_name: onlineshop-user-service
-#    ports:
-#      - "8083:8083"
-#
-#  payment-service:
-#    build:
-#      context: ./payment-service
-#      dockerfile: Dockerfile
-#    image: madhuraonline/ead-payment-service
-#    container_name: onlineshop-payment-service
-#    ports:
-#      - "8085:8085"
-#
-#  api-gateway:
-#    build:
-#      context: ./api-gateway
-#      dockerfile: Dockerfile
-#    image: madhuraonline/ead-api-gateway
-#    container_name: onlineshop-api-gateway
-#    ports:
-#      - "9000:9000"
-#    depends_on:
-#      - service-discovery
-#
-#  service-discovery:
-#    build:
-#      context: ./service-discovery
-#      dockerfile: Dockerfile
-#    image: madhuraonline/ead-service-discovery
-#    container_name: onlineshop-service-discovery
-#    ports:
-#      - "8761:8761"
+  product-service:
+    build:
+      context: ./product-service
+      dockerfile: Dockerfile
+    image: madhuraonline/ead-product-service
+    container_name: onlineshop-product-service
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongodb
+
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    image: madhuraonline/ead-auth-service
+    container_name: onlineshop-auth-service
+    ports:
+      - "8084:8084"
+    depends_on:
+      - user-service
+
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    image: madhuraonline/ead-user-service
+    container_name: onlineshop-user-service
+    ports:
+      - "8083:8083"
+
+  payment-service:
+    build:
+      context: ./payment-service
+      dockerfile: Dockerfile
+    image: madhuraonline/ead-payment-service
+    container_name: onlineshop-payment-service
+    ports:
+      - "8085:8085"
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    image: madhuraonline/ead-api-gateway
+    container_name: onlineshop-api-gateway
+    ports:
+      - "9000:9000"
+    depends_on:
+      - service-discovery
+
+  service-discovery:
+    build:
+      context: ./service-discovery
+      dockerfile: Dockerfile
+    image: madhuraonline/ead-service-discovery
+    container_name: onlineshop-service-discovery
+    ports:
+      - "8761:8761"

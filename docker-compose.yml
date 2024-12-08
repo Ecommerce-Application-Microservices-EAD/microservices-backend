@@ -10,101 +10,97 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: root
       MONGO_INITDB_DATABASE: product-service
     volumes:
-      - ./data/mongodb:/data/db
+      - mongodb_data:/data/db
+    networks:
+      - onlineshop-network
 
-
-  postgres:
-    image: postgres:15
-    container_name: onlineshop-postgres
+  service-discovery:
+    build:
+      context: ./service-discovery
+      dockerfile: Dockerfile
+    container_name: onlineshop-service-discovery
     ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    volumes:
-      - ./data/postgresql:/var/lib/postgresql/data
-      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
-
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: onlineshop-pgadmin
-    ports:
-      - "5001:80"
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: admin
+      - "8761:8761"
+    networks:
+      - onlineshop-network
     depends_on:
-      - postgres
+      - mongodb
 
-#  product-service:
-#    build:
-#      context: ./product-service
-#      dockerfile: Dockerfile
-#    image: madhuraonline/ead-product-service
-#    container_name: onlineshop-product-service
-#    ports:
-#      - "8080:8080"
-#    depends_on:
-#      - mongodb
-#
-#  order-service:
-#    build:
-#      context: ./order-service
-#      dockerfile: Dockerfile
-#    image: madhuraonline/ead-order-service
-#    container_name: onlineshop-order-service
-#    ports:
-#      - "8081:8081"
-#    depends_on:
-#      - postgres
-#
-#  auth-service:
-#    build:
-#      context: ./auth-service
-#      dockerfile: Dockerfile
-#    image: madhuraonline/ead-auth-service
-#    container_name: onlineshop-auth-service
-#    ports:
-#      - "8084:8084"
-#    depends_on:
-#      - user-service
-#
-#  inventory-service:
-#    build:
-#      context: ./inventory-service
-#      dockerfile: Dockerfile
-#    image: madhuraonline/ead-inventory-service
-#    container_name: onlineshop-inventory-service
-#    ports:
-#      - "8082:8082"
-#    depends_on:
-#      - postgres
-#
-#  user-service:
-#    build:
-#      context: ./user-service
-#      dockerfile: Dockerfile
-#    image: madhuraonline/ead-user-service
-#    container_name: onlineshop-user-service
-#    ports:
-#      - "8083:8083"
-#
-#  api-gateway:
-#    build:
-#      context: ./api-gateway
-#      dockerfile: Dockerfile
-#    image: madhuraonline/ead-api-gateway
-#    container_name: onlineshop-api-gateway
-#    ports:
-#      - "9000:9000"
-#    depends_on:
-#      - service-discovery
-#
-#  service-discovery:
-#    build:
-#      context: ./service-discovery
-#      dockerfile: Dockerfile
-#    image: madhuraonline/ead-service-discovery
-#    container_name: onlineshop-service-discovery
-#    ports:
-#      - "8761:8761"
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: onlineshop-api-gateway
+    ports:
+      - "9000:9000"
+    networks:
+      - onlineshop-network
+    depends_on:
+      - mongodb
+      - service-discovery
+    restart: on-failure
+
+  product-service:
+    build:
+      context: ./product-service
+      dockerfile: Dockerfile
+    container_name: onlineshop-product-service
+    ports:
+      - "8080:8080"
+    networks:
+      - onlineshop-network
+    depends_on:
+      - mongodb
+      - service-discovery
+    restart: on-failure
+
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    container_name: onlineshop-user-service
+    ports:
+      - "8083:8083"
+    networks:
+      - onlineshop-network
+    depends_on:
+      - mongodb
+      - service-discovery
+    restart: on-failure
+
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: onlineshop-auth-service
+    ports:
+      - "8084:8084"
+    networks:
+      - onlineshop-network
+    depends_on:
+      - mongodb
+      - user-service
+      - service-discovery
+    restart: on-failure
+
+  payment-service:
+    build:
+      context: ./payment-service
+      dockerfile: Dockerfile
+    container_name: onlineshop-payment-service
+    ports:
+      - "8085:8085"
+    networks:
+      - onlineshop-network
+    depends_on:
+      - mongodb
+      - service-discovery
+    restart: on-failure
+
+networks:
+  onlineshop-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+    driver: local

@@ -17,12 +17,8 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
-
     private final AuthClient authClient;
-
     private final PasswordEncoder passwordEncoder;
-
-
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody User user) {
@@ -46,5 +42,22 @@ public class UserController {
             }
         }
         return ResponseEntity.badRequest().body("Invalid credentials");
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestParam String username, @RequestParam String oldPassword,
+            @RequestParam String newPassword) {
+        User foundUser = userService.findByUsername(username);
+        if (foundUser != null && passwordEncoder.matches(oldPassword, foundUser.getPassword())) {
+            foundUser.setPassword(passwordEncoder.encode(newPassword));
+            userService.updateUser(foundUser);
+            return ResponseEntity.ok("Password changed successfully");
+        }
+        return ResponseEntity.badRequest().body("Invalid credentials");
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<?> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
     }
 }

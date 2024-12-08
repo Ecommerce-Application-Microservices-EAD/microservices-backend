@@ -32,6 +32,7 @@ services:
     ports:
       - "8084:8084"
     depends_on:
+      - mongodb
       - user-service
 
   user-service:
@@ -42,6 +43,8 @@ services:
     container_name: onlineshop-user-service
     ports:
       - "8083:8083"
+    depends_on:
+      - mongodb
 
   payment-service:
     build:
@@ -51,6 +54,8 @@ services:
     container_name: onlineshop-payment-service
     ports:
       - "8085:8085"
+    depends_on:
+      - mongodb
 
   api-gateway:
     build:
@@ -61,6 +66,7 @@ services:
     ports:
       - "9000:9000"
     depends_on:
+      - mongodb
       - service-discovery
 
   service-discovery:
@@ -71,3 +77,5 @@ services:
     container_name: onlineshop-service-discovery
     ports:
       - "8761:8761"
+    depends_on:
+      - mongodb

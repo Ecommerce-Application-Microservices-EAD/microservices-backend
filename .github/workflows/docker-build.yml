@@ -1,15 +1,8 @@
-name: Build and Push Docker Images to Docker Hub
+name: Build and Push Docker Images
 on:
   push:
     branches:
       - prod
-    paths:
-      - 'product-service/**'
-      - 'auth-service/**'
-      - 'user-service/**'
-      - 'api-gateway/**'
-      - 'service-discovery/**'
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -32,7 +25,6 @@ jobs:
           ls -R
 
       - name: Build and push product-service
-        if: contains(github.event.head_commit.message, 'product-service') || github.event_name == 'workflow_dispatch'
         uses: docker/build-push-action@v3
         with:
           context: ./product-service
@@ -40,8 +32,9 @@ jobs:
           push: true
           tags: madhuraonline/ead-product-service:latest
 
+
+
       - name: Build and push auth-service
-        if: contains(github.event.head_commit.message, 'auth-service') || github.event_name == 'workflow_dispatch'
         uses: docker/build-push-action@v3
         with:
           context: ./auth-service
@@ -50,7 +43,6 @@ jobs:
           tags: madhuraonline/ead-auth-service:latest
 
       - name: Build and push user-service
-        if: contains(github.event.head_commit.message, 'user-service') || github.event_name == 'workflow_dispatch'
         uses: docker/build-push-action@v3
         with:
           context: ./user-service
@@ -59,7 +51,6 @@ jobs:
           tags: madhuraonline/ead-user-service:latest
 
       - name: Build and push api-gateway
-        if: contains(github.event.head_commit.message, 'api-gateway') || github.event_name == 'workflow_dispatch'
         uses: docker/build-push-action@v3
         with:
           context: ./api-gateway
@@ -68,7 +59,6 @@ jobs:
           tags: madhuraonline/ead-api-gateway:latest
 
       - name: Build and push service-discovery
-        if: contains(github.event.head_commit.message, 'service-discovery') || github.event_name == 'workflow_dispatch'
         uses: docker/build-push-action@v3
         with:
           context: ./service-discovery
@@ -79,7 +69,7 @@ jobs:
       - name: Debug - Docker build logs
         if: failure()
         run: |
-          for service in product-service auth-service user-service api-gateway service-discovery; do
+          for service in product-service order-service auth-service inventory-service user-service api-gateway service-discovery; do
             echo "Building $service"
             docker build ./$service -t $service-debug || true
           done

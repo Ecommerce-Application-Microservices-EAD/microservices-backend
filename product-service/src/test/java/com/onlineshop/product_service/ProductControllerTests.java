@@ -37,7 +37,7 @@ public class ProductControllerTests {
 
         @BeforeEach
         void setup() {
-                RestAssured.baseURI = "http://24.199.74.48";
+                RestAssured.baseURI = "http://localhost";
                 RestAssured.port = port;
         }
 

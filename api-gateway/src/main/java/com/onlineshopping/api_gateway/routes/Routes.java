@@ -17,19 +17,19 @@ public class Routes {
 
                 RouteLocator routeLocator = builder.routes()
                         .route("product-service", r -> r.path("/api/v1/products/**")
-                                .uri("http://24.199.74.48:8080"))
+                                .uri("http://localhost:8080"))
                         .route("inventory-service", r -> r.path("/api/inventory/**")
-                                .uri("http://24.199.74.48:8082"))
+                                .uri("http://localhost:8082"))
                         .route("user-service", r -> r.path("/api/user/**")
-                                .uri("http://24.199.74.48:8083"))
+                                .uri("http://localhost:8083"))
                         .route("auth-service", r -> r.path("/api/auth/**")
-                                .uri("http://24.199.74.48:8084"))
+                                .uri("http://localhost:8084"))
                         .route("payment-service-payments", r -> r.path("/api/v1/payments/**")
-                                .uri("http://24.199.74.48:8085"))
+                                .uri("http://localhost:8085"))
                         .route("payment-service-cart", r -> r.path("/api/v1/cart/**")
-                                .uri("http://24.199.74.48:8085"))
+                                .uri("http://localhost:8085"))
                         .route("payment-service-orders", r -> r.path("/api/v1/orders/**")
-                                .uri("http://24.199.74.48:8085"))
+                                .uri("http://localhost:8085"))
                         .build();
 
                 log.info("Gateway routes configured successfully.");

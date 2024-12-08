@@ -36,8 +36,7 @@ class CartServiceTest {
         when(cartRepository.save(any(Cart.class))).thenReturn(cart);
 
         Item item = new Item("prod123", "Test Item", 1, 10.0, "user123");
-        cartService.addItem(item);
-
+        cartService.addItem("user123", item);
         verify(cartRepository, times(1)).save(cart);
 
         assertEquals(1, cart.getItems().size(), "Cart should contain 1 item after addition");

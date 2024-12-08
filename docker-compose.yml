@@ -43,6 +43,15 @@ services:
     ports:
       - "8083:8083"
 
+  user-service:
+    build:
+      context: ./payment-service
+      dockerfile: Dockerfile
+    image: madhuraonline/payment-service
+    container_name: onlineshop-payment-service
+    ports:
+      - "8085:8085"
+
   api-gateway:
     build:
       context: ./api-gateway

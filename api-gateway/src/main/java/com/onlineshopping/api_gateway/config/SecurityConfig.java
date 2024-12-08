@@ -59,7 +59,7 @@ public class SecurityConfig {
                         .pathMatchers(HttpMethod.DELETE, "/api/v1/products/{productId}").hasRole("ADMIN")
                         
                         //.pathMatchers("/api/inventory/**").hasAnyRole("ADMIN")
-                        .pathMatchers("/api/order/**").hasAnyRole("USER")
+                        .pathMatchers("/api/v1/orders/**").hasAnyRole("USER", "ADMIN")
                         .pathMatchers("/api/v1/payments/**").hasAnyRole("USER")
                         .pathMatchers("/api/v1/cart/**").hasAnyRole("USER")
                         

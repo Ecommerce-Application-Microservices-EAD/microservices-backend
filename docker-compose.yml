@@ -47,7 +47,7 @@ services:
     build:
       context: ./payment-service
       dockerfile: Dockerfile
-    image: madhuraonline/payment-service
+    image: madhuraonline/ead-payment-service
     container_name: onlineshop-payment-service
     ports:
       - "8085:8085"

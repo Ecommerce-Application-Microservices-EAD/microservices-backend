@@ -2,7 +2,7 @@ name: Build and Push Docker Images
 on:
   push:
     branches:
-      - hgfjh
+      - prod
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -32,13 +32,7 @@ jobs:
           push: true
           tags: madhuraonline/ead-product-service:latest
 
-      - name: Build and push order-service
-        uses: docker/build-push-action@v3
-        with:
-          context: ./order-service
-          file: ./order-service/Dockerfile
-          push: true
-          tags: madhuraonline/ead-order-service:latest
+
 
       - name: Build and push auth-service
         uses: docker/build-push-action@v3
@@ -48,14 +42,6 @@ jobs:
           push: true
           tags: madhuraonline/ead-auth-service:latest
 
-      - name: Build and push inventory-service
-        uses: docker/build-push-action@v3
-        with:
-          context: ./inventory-service
-          file: ./inventory-service/Dockerfile
-          push: true
-          tags: madhuraonline/ead-inventory-service:latest
-
       - name: Build and push user-service
         uses: docker/build-push-action@v3
         with:
@@ -63,6 +49,14 @@ jobs:
           file: ./user-service/Dockerfile
           push: true
           tags: madhuraonline/ead-user-service:latest
+
+      - name: Build and push payment-service
+        uses: docker/build-push-action@v3
+        with:
+          context: ./payment-service
+          file: ./payment-service/Dockerfile
+          push: true
+          tags: madhuraonline/ead-payment-service:latest
 
       - name: Build and push api-gateway
         uses: docker/build-push-action@v3
@@ -83,7 +77,7 @@ jobs:
       - name: Debug - Docker build logs
         if: failure()
         run: |
-          for service in product-service order-service auth-service inventory-service user-service api-gateway service-discovery; do
+          for service in product-service auth-service payment-service user-service api-gateway service-discovery; do
             echo "Building $service"
             docker build ./$service -t $service-debug || true
           done

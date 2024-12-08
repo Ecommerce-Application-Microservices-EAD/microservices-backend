@@ -3,6 +3,7 @@ package com.onlineshop.user_service.controller;
 import com.onlineshop.user_service.client.AuthClient;
 import com.onlineshop.user_service.model.User;
 import com.onlineshop.user_service.service.UserService;
+import com.onlineshop.user_service.model.ChangePasswordRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -45,11 +46,10 @@ public class UserController {
     }
 
     @PostMapping("/change-password")
-    public ResponseEntity<?> changePassword(@RequestParam String username, @RequestParam String oldPassword,
-            @RequestParam String newPassword) {
-        User foundUser = userService.findByUsername(username);
-        if (foundUser != null && passwordEncoder.matches(oldPassword, foundUser.getPassword())) {
-            foundUser.setPassword(passwordEncoder.encode(newPassword));
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest changePasswordRequest) {
+        User foundUser = userService.findByUsername(changePasswordRequest.getUsername());
+        if (foundUser != null && passwordEncoder.matches(changePasswordRequest.getOldPassword(), foundUser.getPassword())) {
+            foundUser.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
             userService.updateUser(foundUser);
             return ResponseEntity.ok("Password changed successfully");
         }

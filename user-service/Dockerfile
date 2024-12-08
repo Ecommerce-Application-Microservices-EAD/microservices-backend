@@ -6,7 +6,7 @@ WORKDIR /app
 COPY . .
 
 # Build the application and print verbose output
-RUN mvn clean package -DskipTests -e
+RUN mvn clean package -DskipTests -X
 
 # Debugging: List the contents of the target directory
 RUN ls -la target

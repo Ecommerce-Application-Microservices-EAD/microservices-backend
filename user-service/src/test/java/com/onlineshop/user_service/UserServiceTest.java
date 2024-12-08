@@ -9,9 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
 import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -68,5 +66,20 @@ class UserServiceTest {
 
         assertNull(foundUser);
         verify(userRepository, times(1)).findByUsername("nonexistent");
+    }
+
+    @Test
+    void testChangePassword() {
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("oldPassword", "password")).thenReturn(true);
+        when(passwordEncoder.encode("newPassword")).thenReturn("encodedNewPassword");
+        when(userRepository.save(any(User.class))).thenReturn(user);
+
+        userService.changePassword("testuser", "oldPassword", "newPassword");
+
+        verify(userRepository, times(1)).findByUsername("testuser");
+        verify(passwordEncoder, times(1)).matches("oldPassword", "password");
+        verify(passwordEncoder, times(1)).encode("newPassword");
+        verify(userRepository, times(1)).save(user);
     }
 }

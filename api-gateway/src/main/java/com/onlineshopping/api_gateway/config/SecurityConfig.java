@@ -48,8 +48,6 @@ public class SecurityConfig {
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers(HttpMethod.OPTIONS).permitAll()
                         .pathMatchers(AUTH_WHITELIST).permitAll()
-                        .pathMatchers("/api/v1/payments/**", "/api/v1/cart/**").permitAll() // Fully open paths
-                        .pathMatchers("/api/v1/orders/**").permitAll()
                         
                         .pathMatchers("/api/auth/**", "/api/user/**").permitAll()
                         .pathMatchers(HttpMethod.GET, "/api/v1/products", "/api/v1/products/{productId}", "/api/v1/products/categories", "/api/v1/products/search").permitAll()
@@ -57,10 +55,11 @@ public class SecurityConfig {
                         .pathMatchers(HttpMethod.PUT, "/api/v1/products/{productId}").hasRole("ADMIN")
                         .pathMatchers(HttpMethod.DELETE, "/api/v1/products/{productId}").hasRole("ADMIN")
                         .pathMatchers(HttpMethod.PATCH, "/api/v1/products/{productId}/reduce-quantity").permitAll()
+                        
                         .pathMatchers("/api/inventory/**").hasAnyRole("ADMIN")
-                        // .pathMatchers("/api/order/**").hasAnyRole("USER")
-                        // .pathMatchers("/api/v1/payments/**").hasAnyRole("USER")
-                        // .pathMatchers("/api/v1/cart/**").hasAnyRole("USER")
+                        .pathMatchers("/api/order/**").hasAnyRole("USER")
+                        .pathMatchers("/api/v1/payments/**").hasAnyRole("USER")
+                        .pathMatchers("/api/v1/cart/**").hasAnyRole("USER")
                         
                         .anyExchange().authenticated()
                 )

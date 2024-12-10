@@ -48,7 +48,8 @@ public class UserController {
     @PostMapping("/change-password")
     public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest changePasswordRequest) {
         User foundUser = userService.findByUsername(changePasswordRequest.getUsername());
-        if (foundUser != null && passwordEncoder.matches(changePasswordRequest.getOldPassword(), foundUser.getPassword())) {
+        if (foundUser != null
+                && passwordEncoder.matches(changePasswordRequest.getOldPassword(), foundUser.getPassword())) {
             foundUser.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
             userService.updateUser(foundUser);
             return ResponseEntity.ok("Password changed successfully");

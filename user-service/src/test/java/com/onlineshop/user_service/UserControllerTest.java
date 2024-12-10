@@ -73,7 +73,6 @@ class UserControllerTest {
         verify(authClient, times(1)).getToken(eq("testuser"), anyString());
     }
 
-
     @Test
     void testLoginWithInvalidCredentials() {
         when(userService.findByUsername(eq("testuser"))).thenReturn(null);
@@ -120,4 +119,3 @@ class UserControllerTest {
         verify(userService, times(1)).updateUser(user);
     }
 }
-

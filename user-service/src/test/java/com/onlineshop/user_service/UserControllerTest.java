@@ -18,6 +18,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+import com.onlineshop.user_service.model.ChangePasswordRequest;
+
 class UserControllerTest {
 
     @InjectMocks
@@ -71,7 +73,6 @@ class UserControllerTest {
         verify(authClient, times(1)).getToken(eq("testuser"), anyString());
     }
 
-
     @Test
     void testLoginWithInvalidCredentials() {
         when(userService.findByUsername(eq("testuser"))).thenReturn(null);
@@ -99,5 +100,22 @@ class UserControllerTest {
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals("Error while authenticating", response.getBody());
     }
-}
 
+    @Test
+    void testChangePassword() {
+        ChangePasswordRequest changePasswordRequest = new ChangePasswordRequest();
+        changePasswordRequest.setUsername("testuser");
+        changePasswordRequest.setOldPassword("oldPassword");
+        changePasswordRequest.setNewPassword("newPassword");
+
+        when(userService.findByUsername("testuser")).thenReturn(user);
+        when(passwordEncoder.matches("oldPassword", user.getPassword())).thenReturn(true);
+        when(passwordEncoder.encode("newPassword")).thenReturn("encodedNewPassword");
+
+        ResponseEntity<?> response = userController.changePassword(changePasswordRequest);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Password changed successfully", response.getBody());
+        verify(userService, times(1)).updateUser(user);
+    }
+}

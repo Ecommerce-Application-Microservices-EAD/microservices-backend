@@ -30,13 +30,13 @@ public class PaymentControllerTest {
         Mockito.when(paymentService.createPayment(anyLong(), anyString(), anyString()))
                 .thenReturn("12345, secretKey");
 
-        var result = mockMvc.perform(post("/api/payments/create")
+        var result = mockMvc.perform(post("/api/v1/payments/create")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"amount\": 1000, \"currency\": \"USD\", \"userId\": \"user123\"}"))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        assertEquals("{\"paymentId\":\"12345\",\"clientSecret\":\"secretKey\"}", result.getResponse().getContentAsString());
+        assertEquals("{\"clientSecret\":\"secretKey\",\"paymentId\":\"12345\"}", result.getResponse().getContentAsString());
     }
 
     @Test
@@ -45,7 +45,7 @@ public class PaymentControllerTest {
         payment.setId("payment123");
         Mockito.when(paymentService.getPayment("payment123")).thenReturn(payment);
 
-        var result = mockMvc.perform(get("/api/payments/payment123"))
+        var result = mockMvc.perform(get("/api/v1/payments/payment123"))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -59,7 +59,7 @@ public class PaymentControllerTest {
         updatedPayment.setId("payment123");
         Mockito.when(paymentService.updatePaymentStatus("payment123", "confirmed")).thenReturn(updatedPayment);
 
-        var result = mockMvc.perform(put("/api/payments/payment123/status")
+        var result = mockMvc.perform(put("/api/v1/payments/payment123/status")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"status\": \"confirmed\"}"))
                 .andExpect(status().isOk())
@@ -69,12 +69,11 @@ public class PaymentControllerTest {
                 result.getResponse().getContentAsString());
     }
 
-
     @Test
     void testConfirmPayment() throws Exception {
         Mockito.doNothing().when(paymentService).confirmPayment("payment123");
 
-        var result = mockMvc.perform(post("/api/payments/payment123/confirm"))
+        var result = mockMvc.perform(post("/api/v1/payments/payment123/confirm"))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -85,7 +84,7 @@ public class PaymentControllerTest {
     void testCancelPayment() throws Exception {
         Mockito.doNothing().when(paymentService).cancelPayment("payment123");
 
-        var result = mockMvc.perform(post("/api/payments/payment123/cancel"))
+        var result = mockMvc.perform(post("/api/v1/payments/payment123/cancel"))
                 .andExpect(status().isOk())
                 .andReturn();
 

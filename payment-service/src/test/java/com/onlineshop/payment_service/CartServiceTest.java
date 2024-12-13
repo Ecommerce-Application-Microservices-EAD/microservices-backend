@@ -31,16 +31,21 @@ class CartServiceTest {
 
     @Test
     void testAddToCart() {
+        // Arrange: Create a mock cart and set expectations
         Cart cart = new Cart("cart123", "user123", new ArrayList<>());
         when(cartRepository.findByUserId("user123")).thenReturn(Optional.of(cart));
         when(cartRepository.save(any(Cart.class))).thenReturn(cart);
 
+        // Create the item to be added
         Item item = new Item("prod123", "Test Item", 1, 10.0, "user123");
-        cartService.addItem(item);
 
+        // Act: Call the cart service addItem method as the controller would
+        cartService.addItem("user123", item);
+
+        // Assert: Verify interactions and state
         verify(cartRepository, times(1)).save(cart);
-
         assertEquals(1, cart.getItems().size(), "Cart should contain 1 item after addition");
+        assertEquals(item, cart.getItems().get(0), "Added item should match the expected item");
     }
 
     @Test
